@@ -1,0 +1,3664 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>ห้องปฏิบัติการจำลองฟิสิกส์: แรงและการเคลื่อนที่ (Forces & Motion Lab)</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Sarabun', 'Inter', sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+    .font-mono-num {
+      font-family: 'Inter', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+    input[type="range"] {
+      accent-color: #38bdf8;
+      touch-action: manipulation;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 9999px;
+      background: #38bdf8;
+      cursor: pointer;
+    }
+    button, label, input {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #sim-canvas {
+      touch-action: none;
+    }
+    @media (max-width: 640px) {
+      .step-btn {
+        width: 2.15rem !important;
+        height: 2.15rem !important;
+        font-size: 0.9rem !important;
+      }
+      .ctrl-card {
+        padding: 0.65rem !important;
+      }
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1e293b;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 3px;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      opacity: 1;
+    }
+    .ctrl-card {
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(51, 65, 85, 0.75);
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+    .ctrl-card:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(15, 23, 42, 0.9);
+    }
+    .step-btn {
+      width: 1.75rem;
+      height: 1.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      font-weight: 700;
+      font-size: 0.85rem;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .step-btn:hover {
+      background: #334155;
+      color: #38bdf8;
+      border-color: #38bdf8;
+    }
+    .step-btn:active {
+      transform: scale(0.94);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+
+  <!-- Header (Clean: Brand + Active Topic Badge + Top-Right 3-Line Hamburger Menu Button) -->
+  <header class="border-b border-slate-800 bg-slate-900/95 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 shrink-0">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <div class="truncate">
+          <div class="flex items-center gap-2">
+            <h1 class="text-base md:text-lg font-bold tracking-tight text-white truncate">ห้องปฏิบัติการจำลองฟิสิกส์: แรงและการเคลื่อนที่</h1>
+            <span id="active-mode-pill" class="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/30">
+              1. พื้นราบและแรงเสียดทาน
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block">หน้าหลักสำหรับทดสอบแรงซูมเข้า-ออกได้ • เลือกโหมด กราฟ สมการ และตารางข้อมูลได้ที่เมนู 3 ขีดมุมบนขวา</p>
+        </div>
+      </div>
+
+      <!-- Right Action Area: Back to Lab button (when on secondary page) + 3-Line Hamburger Button -->
+      <div class="flex items-center gap-2 shrink-0">
+        <button id="btn-back-to-lab" type="button" class="hidden items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20 transition">
+          <span>←</span>
+          <span>กลับหน้าทดสอบแรง</span>
+        </button>
+
+        <button id="btn-open-drawer" type="button" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs md:text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 hover:border-sky-500/50 shadow transition" aria-label="เปิดเมนูหัวข้อ" title="เปิดเมนูหัวข้อและหน้าอื่นๆ">
+          <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          <span>เมนูหัวข้อ</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Slide-Over 3-Line Navigation Drawer (Top-Right Hamburger Menu) -->
+  <div id="drawer-backdrop" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-200"></div>
+
+  <aside id="nav-drawer" class="fixed top-0 right-0 h-full w-80 sm:w-96 max-w-[92vw] bg-slate-900 border-l border-slate-800 shadow-2xl z-50 transform translate-x-full transition-transform duration-200 flex flex-col">
+    <!-- Drawer Header -->
+    <div class="px-4 py-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+        <h2 class="text-sm font-bold text-white">เมนูหัวข้อและการนำทาง</h2>
+      </div>
+      <button id="btn-close-drawer" type="button" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center border border-slate-700 transition" title="ปิดเมนู">
+        ✕
+      </button>
+    </div>
+
+    <!-- Drawer Scrollable Body -->
+    <div class="flex-1 overflow-y-auto p-4 space-y-5">
+
+      <!-- Section 1: Main Pages / Topic Views -->
+      <div class="space-y-2">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-sky-400 px-1">
+          1. เลือกหน้าแสดงผล (Pages & Tools)
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <button id="menu-page-lab" type="button" class="menu-page-btn w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-sky-500 text-slate-950 shadow flex items-center justify-between transition">
+            <span class="flex items-center gap-2.5">
+              <span class="text-base">🧪</span>
+              <span>
+                <span class="block font-bold">หน้าหลัก: ทดสอบแรง (Lab)</span>
+                <span class="block text-[10px] opacity-80">หน้าจอจำลองการเคลื่อนที่และปรับค่าแรง</span>
+              </span>
+            </span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-950/20 font-bold">หน้าหลัก</span>
+          </button>
+
+          <button id="menu-page-kinematics" type="button" class="menu-page-btn w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700/70 flex items-center justify-between transition">
+            <span class="flex items-center gap-2.5">
+              <span class="text-base">📈</span>
+              <span>
+                <span class="block font-semibold">กราฟการเคลื่อนที่ (x, v, a)</span>
+                <span class="block text-[10px] text-slate-400">กราฟตำแหน่ง ความเร็ว และความเร่งตามเวลา</span>
+              </span>
+            </span>
+            <span class="text-slate-400">→</span>
+          </button>
+
+          <button id="menu-page-energy" type="button" class="menu-page-btn w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700/70 flex items-center justify-between transition">
+            <span class="flex items-center gap-2.5">
+              <span class="text-base">⚡</span>
+              <span>
+                <span class="block font-semibold">กราฟงานและพลังงาน (Energy)</span>
+                <span class="block text-[10px] text-slate-400">พลังงานจลน์ พลังงานศักย์ และงานความเสียดทาน</span>
+              </span>
+            </span>
+            <span class="text-slate-400">→</span>
+          </button>
+
+          <button id="menu-page-formulas" type="button" class="menu-page-btn w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700/70 flex items-center justify-between transition">
+            <span class="flex items-center gap-2.5">
+              <span class="text-base">🧮</span>
+              <span>
+                <span class="block font-semibold">วิเคราะห์แรง FBD & สมการ</span>
+                <span class="block text-[10px] text-slate-400">การแตกแรง กฎของนิวตัน และการแทนค่าจริง</span>
+              </span>
+            </span>
+            <span class="text-slate-400">→</span>
+          </button>
+
+          <button id="menu-page-logger" type="button" class="menu-page-btn w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700/70 flex items-center justify-between transition">
+            <span class="flex items-center gap-2.5">
+              <span class="text-base">📋</span>
+              <span>
+                <span class="block font-semibold">ตารางบันทึกผลการทดลอง</span>
+                <span class="block text-[10px] text-slate-400">ดูข้อมูลที่บันทึกและคัดลอกเป็นไฟล์ CSV</span>
+              </span>
+            </span>
+            <span class="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-mono-num" id="drawer-log-badge">0 จุด</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Section 2: Simulation Modes (4 Topics) -->
+      <div class="space-y-2 pt-2 border-t border-slate-800">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 px-1">
+          2. หัวข้อโหมดการทดลอง (Simulation Modes)
+        </div>
+        <nav class="flex flex-col gap-1.5" aria-label="Simulation Modes">
+          <button id="tab-horizontal" type="button" class="mode-tab w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-sky-500 text-slate-950 shadow">
+            1. พื้นราบและแรงเสียดทาน
+          </button>
+          <button id="tab-incline" type="button" class="mode-tab w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all text-slate-300 hover:text-white bg-slate-800/70 hover:bg-slate-700/60">
+            2. พื้นเอียง (Inclined Plane)
+          </button>
+          <button id="tab-pulley" type="button" class="mode-tab w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all text-slate-300 hover:text-white bg-slate-800/70 hover:bg-slate-700/60">
+            3. ระบบรอกและมวลคูควบ
+          </button>
+          <button id="tab-projectile" type="button" class="mode-tab w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all text-slate-300 hover:text-white bg-slate-800/70 hover:bg-slate-700/60">
+            4. โพรเจกไทล์และแรงต้านอากาศ
+          </button>
+        </nav>
+      </div>
+
+      <!-- Section 3: 1-Click Quick Scenarios -->
+      <div class="space-y-2 pt-2 border-t border-slate-800">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-amber-400 px-1">
+          3. โจทย์การทดลองลัด (1-Click Scenarios)
+        </div>
+        <div class="grid grid-cols-1 gap-1.5 text-xs">
+          <button id="btn-scen-threshold" type="button" class="w-full text-left px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-sky-500/20 text-slate-200 hover:text-sky-300 border border-slate-700/80 hover:border-sky-500/40 transition font-medium">
+            ⚖️ ปริ่มไถล (F = fs,max พอดี)
+          </button>
+          <button id="btn-scen-accelerate" type="button" class="w-full text-left px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-emerald-500/20 text-slate-200 hover:text-emerald-300 border border-slate-700/80 hover:border-emerald-500/40 transition font-medium">
+            🚀 ดึงชนะแรงเสียดทาน (เริ่มวิ่ง)
+          </button>
+          <button id="btn-scen-critical" type="button" class="w-full text-left px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-amber-500/20 text-slate-200 hover:text-amber-300 border border-slate-700/80 hover:border-amber-500/40 transition font-medium">
+            📐 มุมวิกฤตพื้นเอียง (θ = arctan μs)
+          </button>
+          <button id="btn-scen-pulley" type="button" class="w-full text-left px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-indigo-500/20 text-slate-200 hover:text-indigo-300 border border-slate-700/80 hover:border-indigo-500/40 transition font-medium">
+            ⚙️ รอกมวลคูควบเร่งคงตัว
+          </button>
+          <button id="btn-scen-proj45" type="button" class="w-full text-left px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-purple-500/20 text-slate-200 hover:text-purple-300 border border-slate-700/80 hover:border-purple-500/40 transition font-medium">
+            🎯 ยิงโพรเจกไทล์ไกลสุด 45°
+          </button>
+        </div>
+      </div>
+
+      <!-- Section 4: Display & Sound Options -->
+      <div class="space-y-2.5 pt-2 border-t border-slate-800 text-xs">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-purple-400 px-1">
+          4. ตั้งค่าการแสดงผลบนจอทดสอบ
+        </div>
+        <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-2.5">
+          <label class="flex items-center justify-between cursor-pointer select-none text-slate-300 hover:text-white">
+            <span>แสดงเวกเตอร์แรง (FBD)</span>
+            <input type="checkbox" id="chk-fbd" checked class="rounded bg-slate-700 border-slate-600 text-sky-500 focus:ring-0">
+          </label>
+          <label class="flex items-center justify-between cursor-pointer select-none text-slate-300 hover:text-white">
+            <span>แตกแรงย่อย (Components)</span>
+            <input type="checkbox" id="chk-components" checked class="rounded bg-slate-700 border-slate-600 text-sky-500 focus:ring-0">
+          </label>
+          <label class="flex items-center justify-between cursor-pointer select-none text-slate-300 hover:text-white">
+            <span>ตัวเลขกำกับเวกเตอร์</span>
+            <input type="checkbox" id="chk-values" checked class="rounded bg-slate-700 border-slate-600 text-sky-500 focus:ring-0">
+          </label>
+          <label class="flex items-center justify-between cursor-pointer select-none text-slate-300 hover:text-white">
+            <span>เสียงเอฟเฟกต์ (Sound FX)</span>
+            <input type="checkbox" id="chk-sound" class="rounded bg-slate-700 border-slate-600 text-sky-500 focus:ring-0">
+          </label>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ===================================================================== -->
+  <!-- VIEW 1 (DEFAULT MAIN VIEW): TESTING WORKSPACE ONLY                    -->
+  <!-- ===================================================================== -->
+  <!-- Mobile Quick Mode Switcher Strip (Visible on mobile/tablet so users can switch physics modes in 1 tap or via 3-line menu) -->
+  <div class="lg:hidden bg-slate-900/90 border-b border-slate-800 px-3 py-2 overflow-x-auto">
+    <div class="flex items-center gap-1.5 min-w-max">
+      <button type="button" data-mobile-mode="horizontal" class="mobile-mode-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-500 text-slate-950 shadow">
+        1. พื้นราบ
+      </button>
+      <button type="button" data-mobile-mode="incline" class="mobile-mode-pill px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
+        2. พื้นเอียง
+      </button>
+      <button type="button" data-mobile-mode="pulley" class="mobile-mode-pill px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
+        3. ระบบรอก
+      </button>
+      <button type="button" data-mobile-mode="projectile" class="mobile-mode-pill px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
+        4. โพรเจกไทล์
+      </button>
+    </div>
+  </div>
+
+  <main id="view-lab-main" class="max-w-7xl w-full mx-auto px-2.5 sm:px-4 py-2.5 sm:py-4 pb-20 sm:pb-6 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4">
+
+    <!-- Left / Center Column: Simulation Canvas + Playback + Compact Telemetry (8 cols) -->
+    <section class="lg:col-span-8 flex flex-col gap-3.5">
+
+      <!-- Simulation Canvas Card -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex flex-col">
+        <!-- Minimal Top Bar inside Canvas Card -->
+        <div class="px-3 sm:px-4 py-2 bg-slate-800/60 border-b border-slate-800 flex flex-wrap items-center justify-between gap-1.5">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span id="status-badge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              <span id="status-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span id="status-text">พร้อมจำลอง (หยุดชั่วคราว)</span>
+            </span>
+            <span id="regime-badge" class="inline-flex items-center px-2 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-medium bg-slate-700/80 text-slate-200 truncate max-w-[180px] sm:max-w-none">
+              สมดุลสถิต (Static)
+            </span>
+          </div>
+
+          <!-- Quick Vector Size Slider & Mobile Pin Toggle -->
+          <div class="flex items-center gap-1.5 text-xs">
+            <button id="btn-toggle-legend-mobile" type="button" class="sm:hidden px-2 py-1 rounded-lg bg-slate-900/90 border border-slate-700 text-[11px] text-slate-300">
+              🏷️ สีเวกเตอร์
+            </button>
+            <div class="inline-flex items-center gap-1 bg-slate-900/90 px-2 py-1 rounded-lg border border-slate-700/80" title="ปรับขนาดความยาวลูกศรเวกเตอร์บนจอ">
+              <span class="text-slate-400 text-[10px] sm:text-[11px]">ลูกศร:</span>
+              <input id="slider-vec-scale" type="range" min="0.5" max="2.0" step="0.1" value="1.0" class="w-12 sm:w-16 h-1 bg-slate-700 rounded cursor-pointer">
+              <span id="disp-vec-scale" class="font-mono-num text-[10px] sm:text-[11px] text-sky-400 font-semibold">1.0x</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compact Vector Legend Strip on Mobile (Collapsible on <640px so it never blocks canvas) -->
+        <div id="mobile-legend-bar" class="hidden sm:hidden px-3 py-1.5 bg-slate-950 border-b border-slate-800 text-[10px] flex-wrap gap-x-2.5 gap-y-1">
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400 inline-block"></span> F_app (แรงดึง)</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-400 inline-block"></span> f (เสียดทาน)</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> N/T (แนวฉาก/ตึงเชือก)</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-400 inline-block"></span> mg (น้ำหนัก)</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span> ΣF (แรงลัพธ์)</span>
+        </div>
+
+        <!-- Interactive HTML5 Canvas (Responsive height for mobile vs desktop) -->
+        <div id="canvas-container" class="relative w-full h-[260px] sm:h-[380px] lg:h-[450px] bg-slate-950 select-none overflow-hidden transition-all duration-300">
+          <canvas id="sim-canvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+
+          <!-- Floating Legend for Vectors (Desktop/Tablet Top-Left) -->
+          <div class="hidden sm:flex absolute top-3 left-3 bg-slate-900/90 backdrop-blur border border-slate-800 rounded-xl px-3 py-2 text-[11px] flex-wrap gap-x-3 gap-y-1 pointer-events-none max-w-[54%] shadow-lg">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-sky-400 inline-block"></span> แรงกระทำ (F_app)</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-400 inline-block"></span> แรงเสียดทาน/ต้าน (f)</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span> แรงแนวฉาก/ตึงเชือก (N / T)</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block"></span> น้ำหนัก (mg)</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> แรงลัพธ์ (ΣF)</span>
+          </div>
+
+          <!-- Floating Zoom & View Control Toolbar (Top-Right, compact on mobile) -->
+          <div class="absolute top-2 right-2 sm:top-3 sm:right-3 flex items-center gap-1 sm:gap-1.5 bg-slate-900/95 backdrop-blur border border-slate-700/80 rounded-xl p-1 sm:p-1.5 shadow-xl z-10">
+            <button id="btn-zoom-out" type="button" class="w-8 h-8 sm:w-7 sm:h-7 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-200 hover:text-sky-400 border border-slate-700 flex items-center justify-center font-bold text-base sm:text-sm transition" title="ซูมออก (Zoom Out / -)">
+              −
+            </button>
+            <input id="slider-zoom" type="range" min="0.4" max="3.0" step="0.05" value="1.0" class="hidden md:block w-20 h-1.5 bg-slate-800 rounded-lg cursor-pointer" title="เลื่อนเพื่อซูมเข้า-ออก (40% - 300%)">
+            <button id="btn-zoom-reset" type="button" class="px-2 h-8 sm:h-7 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-sky-400 font-mono-num font-bold text-xs border border-slate-700 transition min-w-[46px]" title="แตะเพื่อรีเซ็ตระดับการซูมเป็น 100%">
+              100%
+            </button>
+            <button id="btn-zoom-in" type="button" class="w-8 h-8 sm:w-7 sm:h-7 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-200 hover:text-sky-400 border border-slate-700 flex items-center justify-center font-bold text-base sm:text-sm transition" title="ซูมเข้า (Zoom In / +)">
+              +
+            </button>
+            <div class="w-px h-5 bg-slate-700 mx-0.5"></div>
+            <button id="btn-recenter" type="button" class="w-8 sm:w-auto sm:px-2 h-8 sm:h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-xs flex items-center justify-center gap-1 transition" title="จัดกึ่งกลางภาพ (Reset Pan)">
+              <span>🎯</span><span class="hidden sm:inline">กึ่งกลาง</span>
+            </button>
+            <button id="btn-cam-follow" type="button" class="w-8 sm:w-auto sm:px-2 h-8 sm:h-7 rounded-lg bg-sky-500/20 border border-sky-500/40 text-sky-300 text-xs font-semibold flex items-center justify-center gap-1 transition" title="เปิด/ปิด กล้องติดตามวัตถุอัตโนมัติ">
+              <span>🎥</span><span class="hidden md:inline">ตามวัตถุ</span>
+            </button>
+            <button id="btn-expand-canvas" type="button" class="w-8 sm:w-auto sm:px-2 h-8 sm:h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs flex items-center justify-center gap-1 transition" title="ขยาย/ย่อ ความสูงหน้าจอจำลอง">
+              <span id="expand-icon">⛶</span><span id="expand-label" class="hidden md:inline">ขยายจอ</span>
+            </button>
+          </div>
+
+          <!-- Interaction Mode Switcher (Bottom-Left on Canvas, Touch-Optimized) -->
+          <div class="absolute bottom-2 left-2 sm:bottom-2.5 sm:left-3 flex items-center gap-1 bg-slate-900/95 backdrop-blur border border-slate-700/80 p-1 rounded-xl shadow-lg z-10 text-[11px] sm:text-xs">
+            <button id="btn-tool-force" type="button" class="px-2.5 py-1.5 sm:py-1 rounded-lg font-semibold bg-sky-500 text-slate-950 transition flex items-center gap-1" title="แตะลากบนแคนวาสเพื่อดึงหรือผลักวัตถุ">
+              <span>⚡</span><span>ลากออกแรงดึง</span>
+            </button>
+            <button id="btn-tool-pan" type="button" class="px-2.5 py-1.5 sm:py-1 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1" title="แตะลากบนแคนวาสเพื่อเลื่อนดูตำแหน่งต่างๆ">
+              <span>✋</span><span>เลื่อนมุมมอง (Pan)</span>
+            </button>
+          </div>
+
+          <!-- Interactive Tip Banner (Bottom-Right) -->
+          <div id="canvas-tip" class="absolute bottom-2.5 right-3 bg-slate-900/85 backdrop-blur border border-slate-800/80 text-slate-300 text-[11px] px-2.5 py-1 rounded-lg pointer-events-none hidden lg:block">
+            🖱️ หมุนลูกกลิ้งเมาส์หรือถ่าง 2 นิ้วเพื่อซูม • ลากเพื่อออกแรงหรือเลื่อนจอ
+          </div>
+        </div>
+
+        <!-- Playback & Time Controls Bar (Mobile-Ergonomic) -->
+        <div class="px-3 sm:px-4 py-2.5 sm:py-3 bg-slate-900 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto justify-between sm:justify-start">
+            <button id="btn-play-pause" type="button" class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 transition shadow-lg shadow-emerald-500/20">
+              <span id="play-icon">▶</span>
+              <span id="play-label">เริ่มจำลอง (Start)</span>
+            </button>
+            <button id="btn-step" type="button" class="px-2.5 sm:px-3 py-2 rounded-xl font-medium text-xs bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 border border-slate-700 transition" title="เดินหน้าทีละ 0.02 วินาที">
+              ⏭ +0.02s
+            </button>
+            <button id="btn-reset" type="button" class="px-2.5 sm:px-3 py-2 rounded-xl font-medium text-xs bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 border border-slate-700 transition">
+              ↺ รีเซ็ต (Reset)
+            </button>
+            <button id="btn-record" type="button" class="px-2.5 sm:px-3 py-2 rounded-xl font-medium text-xs bg-indigo-600/30 hover:bg-indigo-600/50 active:scale-95 text-indigo-200 border border-indigo-500/40 transition">
+              📌 บันทึกจุดข้อมูล
+            </button>
+          </div>
+
+          <!-- Speed & Clock -->
+          <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+            <div class="flex items-center gap-1 bg-slate-800 p-1 rounded-lg border border-slate-700 text-xs">
+              <button type="button" data-speed="0.25" class="speed-btn px-2 py-1 rounded text-slate-400 hover:text-white">0.25x</button>
+              <button type="button" data-speed="0.5" class="speed-btn px-2 py-1 rounded text-slate-400 hover:text-white">0.5x</button>
+              <button type="button" data-speed="1" class="speed-btn px-2 py-1 rounded bg-sky-500 text-slate-950 font-semibold">1x</button>
+              <button type="button" data-speed="2" class="speed-btn px-2 py-1 rounded text-slate-400 hover:text-white">2x</button>
+            </div>
+            <div class="px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono-num">
+              <span class="text-slate-400">t = </span>
+              <span id="readout-time" class="text-sky-400 font-bold text-sm">0.00</span>
+              <span class="text-slate-500"> s</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compact Real-Time Telemetry Strip (3x2 on mobile, 6x1 on desktop) -->
+      <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2.5">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-2 sm:p-2.5">
+          <div class="text-[10px] sm:text-[11px] text-slate-400 truncate">ตำแหน่ง (x)</div>
+          <div class="text-sm sm:text-base font-bold font-mono-num text-white mt-0.5"><span id="val-pos">0.00</span> <span class="text-[10px] sm:text-xs font-normal text-slate-400">m</span></div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-2 sm:p-2.5">
+          <div class="text-[10px] sm:text-[11px] text-slate-400 truncate">ความเร็ว (v)</div>
+          <div class="text-sm sm:text-base font-bold font-mono-num text-sky-400 mt-0.5"><span id="val-vel">0.00</span> <span class="text-[10px] sm:text-xs font-normal text-slate-400">m/s</span></div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-2 sm:p-2.5">
+          <div class="text-[10px] sm:text-[11px] text-slate-400 truncate">ความเร่ง (a)</div>
+          <div class="text-sm sm:text-base font-bold font-mono-num text-amber-400 mt-0.5"><span id="val-acc">0.00</span> <span class="text-[10px] sm:text-xs font-normal text-slate-400">m/s²</span></div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-2 sm:p-2.5">
+          <div class="text-[10px] sm:text-[11px] text-slate-400 truncate">แรงลัพธ์ (ΣF)</div>
+          <div class="text-sm sm:text-base font-bold font-mono-num text-emerald-400 mt-0.5"><span id="val-fnet">0.00</span> <span class="text-[10px] sm:text-xs font-normal text-slate-400">N</span></div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-2 sm:p-2.5">
+          <div class="text-[10px] sm:text-[11px] text-slate-400 truncate">เสียดทาน (f)</div>
+          <div class="text-sm sm:text-base font-bold font-mono-num text-rose-400 mt-0.5"><span id="val-ffric">0.00</span> <span class="text-[10px] sm:text-xs font-normal text-slate-400">N</span></div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-2 sm:p-2.5">
+          <div class="text-[10px] sm:text-[11px] text-slate-400 truncate">พลังงานจลน์ (E_k)</div>
+          <div class="text-sm sm:text-base font-bold font-mono-num text-purple-400 mt-0.5"><span id="val-ke">0.00</span> <span class="text-[10px] sm:text-xs font-normal text-slate-400">J</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Parameter Controls Only (4 cols) -->
+    <aside class="lg:col-span-4 flex flex-col gap-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col gap-3.5">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+          <div>
+            <h2 id="control-title" class="text-base font-bold text-white">ตัวแปรการทดลอง: พื้นราบ</h2>
+            <p id="control-subtitle" class="text-xs text-slate-400">ปรับค่าแรง มวล และสัมประสิทธิ์ความเสียดทาน</p>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button id="btn-open-solver-quick" type="button" class="text-xs px-2.5 py-1 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 font-semibold transition">
+              🧮 แก้สมการหาตัวแปร
+            </button>
+            <button id="btn-default-params" type="button" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+              ค่าเริ่มต้น
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Force Balance Meter -->
+        <div id="force-balance-card" class="bg-slate-950/90 border border-slate-800 rounded-xl p-3 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-slate-300 font-semibold flex items-center gap-1.5">
+              <span>🎯 เกจวัดการชนะแรงเสียดทานสถิต</span>
+            </span>
+            <span id="balance-status-pill" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              ชนะแรงเสียดทาน!
+            </span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden relative">
+            <div id="balance-bar-fill" class="h-full bg-gradient-to-r from-sky-500 to-emerald-400 transition-all duration-150" style="width: 100%"></div>
+          </div>
+          <div class="flex justify-between text-[11px] font-mono-num text-slate-400">
+            <span>แรงขับเคลื่อน: <strong id="balance-drive-val" class="text-sky-400">25.0 N</strong></span>
+            <span>ขีดจำกัดเริ่มขยับ (f_s,max): <strong id="balance-fsmax-val" class="text-rose-400">19.6 N</strong></span>
+          </div>
+        </div>
+
+        <!-- Mode 3 Pulley Subtype Selector -->
+        <div id="pulley-type-box" class="hidden space-y-1.5">
+          <label class="text-xs font-semibold text-slate-300 block">รูปแบบระบบรอก (Pulley Configuration)</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" id="btn-pulley-table" class="px-2.5 py-2 rounded-xl text-xs font-semibold bg-sky-500/20 border border-sky-500/40 text-sky-300">
+              มวล m₁ บนโต๊ะ + m₂ แขวน
+            </button>
+            <button type="button" id="btn-pulley-atwood" class="px-2.5 py-2 rounded-xl text-xs font-medium bg-slate-800 border border-slate-700 text-slate-300 hover:text-white">
+              เครื่องกลแอตวูด (แขวนคู่)
+            </button>
+          </div>
+        </div>
+
+        <!-- Sliders Container -->
+        <div class="space-y-3">
+
+          <!-- Applied Force F_app (Modes 1 & 2) -->
+          <div id="ctrl-fapp" class="ctrl-card space-y-2 border-sky-500/30 bg-sky-950/15">
+            <div class="flex items-center justify-between text-xs">
+              <label for="slider-fapp" class="text-sky-200 font-semibold flex items-center gap-1">
+                <span>⚡ แรงดึง/ผลักที่กระทำ (F_app)</span>
+              </label>
+              <div class="flex items-center gap-1">
+                <input id="input-fapp" type="number" min="-100" max="100" step="1" value="25" class="w-16 px-1.5 py-0.5 text-right rounded bg-slate-900 border border-slate-700 text-sky-400 font-mono-num font-bold text-xs focus:outline-none focus:border-sky-400">
+                <span class="font-mono-num text-sky-400 font-semibold hidden"><span id="disp-fapp">25.0</span></span>
+                <span class="text-xs text-slate-400 font-mono-num">N</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" data-step-slider="slider-fapp" data-step-delta="-5" class="step-btn" title="ลดแรง 5 N">−5</button>
+              <button type="button" data-step-slider="slider-fapp" data-step-delta="-1" class="step-btn" title="ลดแรง 1 N">−</button>
+              <input id="slider-fapp" type="range" min="-100" max="100" step="1" value="25" class="flex-1 h-2 bg-slate-800 rounded-lg cursor-pointer">
+              <button type="button" data-step-slider="slider-fapp" data-step-delta="1" class="step-btn" title="เพิ่มแรง 1 N">+</button>
+              <button type="button" data-step-slider="slider-fapp" data-step-delta="5" class="step-btn" title="เพิ่มแรง 5 N">+5</button>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-1 pt-0.5 text-[11px]">
+              <button type="button" id="btn-zero-force" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                ตั้งแรง = 0 N
+              </button>
+              <button type="button" id="btn-match-fsmax" class="px-2 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 transition font-medium">
+                ⚖️ ตั้งเท่ากับ f_s,max พอดี
+              </button>
+              <button type="button" id="btn-exceed-fsmax" class="px-2 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 transition font-medium">
+                🚀 ชนะแรงเสียดทาน (+5N)
+              </button>
+            </div>
+          </div>
+
+          <!-- Force Angle (Mode 1) -->
+          <div id="ctrl-fangle" class="ctrl-card space-y-1.5">
+            <div class="flex justify-between items-center text-xs">
+              <label for="slider-fangle" class="text-slate-300 font-medium">📐 มุมของแรงดึงเทียบแนวระดับ (θ)</label>
+              <div class="flex items-center gap-1.5">
+                <span class="font-mono-num text-sky-400 font-bold"><span id="disp-fangle">0</span>°</span>
+                <button type="button" id="btn-zero-angle" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700">0°</button>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" data-step-slider="slider-fangle" data-step-delta="-5" class="step-btn">−</button>
+              <input id="slider-fangle" type="range" min="-45" max="60" step="1" value="0" class="flex-1 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+              <button type="button" data-step-slider="slider-fangle" data-step-delta="5" class="step-btn">+</button>
+            </div>
+          </div>
+
+          <!-- Ramp Angle (Mode 2) -->
+          <div id="ctrl-ramp" class="ctrl-card space-y-1.5 hidden">
+            <div class="flex justify-between items-center text-xs">
+              <label for="slider-ramp" class="text-slate-300 font-medium">📐 มุมเอียงของพื้น (θ_ramp)</label>
+              <span class="font-mono-num text-amber-400 font-bold"><span id="disp-ramp">25</span>°</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" data-step-slider="slider-ramp" data-step-delta="-1" class="step-btn">−</button>
+              <input id="slider-ramp" type="range" min="0" max="60" step="1" value="25" class="flex-1 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+              <button type="button" data-step-slider="slider-ramp" data-step-delta="1" class="step-btn">+</button>
+            </div>
+            <div class="text-[11px] text-slate-400 flex items-center justify-between pt-0.5">
+              <span>มุมวิกฤตเริ่มไถล θ_c = arctan(μ_s): <strong id="disp-critical-angle" class="font-mono-num text-amber-300">21.8°</strong></span>
+              <button type="button" id="btn-set-crit-angle" class="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-[10px] font-semibold">
+                ตั้งมุมวิกฤต
+              </button>
+            </div>
+          </div>
+
+          <!-- Mass 1 & Mass 2 -->
+          <div class="grid grid-cols-1 gap-2.5">
+            <div id="ctrl-m1" class="ctrl-card space-y-1.5">
+              <div class="flex justify-between items-center text-xs">
+                <label for="slider-m1" id="label-m1" class="text-slate-300 font-medium">📦 มวลของวัตถุ (m)</label>
+                <span class="font-mono-num text-sky-400 font-bold"><span id="disp-m1">5.0</span> kg</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" data-step-slider="slider-m1" data-step-delta="-0.5" class="step-btn">−</button>
+                <input id="slider-m1" type="range" min="0.5" max="25" step="0.5" value="5.0" class="flex-1 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                <button type="button" data-step-slider="slider-m1" data-step-delta="0.5" class="step-btn">+</button>
+              </div>
+            </div>
+
+            <div id="ctrl-m2" class="ctrl-card space-y-1.5 hidden">
+              <div class="flex justify-between items-center text-xs">
+                <label for="slider-m2" class="text-slate-300 font-medium">⚖️ มวลถ่วงที่แขวน (m₂)</label>
+                <span class="font-mono-num text-amber-400 font-bold"><span id="disp-m2">3.0</span> kg</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" data-step-slider="slider-m2" data-step-delta="-0.5" class="step-btn">−</button>
+                <input id="slider-m2" type="range" min="0.5" max="25" step="0.5" value="3.0" class="flex-1 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                <button type="button" data-step-slider="slider-m2" data-step-delta="0.5" class="step-btn">+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Surface / Environment Presets & Friction Coefficients -->
+          <div id="surface-preset-box" class="ctrl-card space-y-2">
+            <label class="text-xs font-semibold text-slate-300 block">🪵 พื้นผิวและสัมประสิทธิ์ความเสียดทาน (Surface Presets)</label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+              <button type="button" data-surface="ice" title="μs = 0.10, μk = 0.03" class="surface-btn px-2 py-1.5 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200">
+                🧊 น้ำแข็ง
+              </button>
+              <button type="button" data-surface="wood" title="μs = 0.40, μk = 0.25" class="surface-btn px-2 py-1.5 rounded-lg text-xs bg-sky-500/20 border border-sky-500/40 text-sky-300 font-semibold">
+                🪵 ไม้บนไม้
+              </button>
+              <button type="button" data-surface="rubber" title="μs = 0.90, μk = 0.70" class="surface-btn px-2 py-1.5 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200">
+                🛞 ยาง-คอนกรีต
+              </button>
+              <button type="button" data-surface="frictionless" title="μs = 0.00, μk = 0.00" class="surface-btn px-2 py-1.5 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200">
+                ✨ ไร้ความเสียดทาน
+              </button>
+            </div>
+
+            <div id="ctrl-mus" class="space-y-1 pt-1">
+              <div class="flex justify-between text-xs">
+                <label for="slider-mus" class="text-slate-300 font-medium">ความเสียดทานสถิต (μ_s)</label>
+                <span class="font-mono-num text-rose-400 font-semibold"><span id="disp-mus">0.40</span></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" data-step-slider="slider-mus" data-step-delta="-0.02" class="step-btn">−</button>
+                <input id="slider-mus" type="range" min="0" max="1.2" step="0.02" value="0.40" class="flex-1 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                <button type="button" data-step-slider="slider-mus" data-step-delta="0.02" class="step-btn">+</button>
+              </div>
+            </div>
+
+            <div id="ctrl-muk" class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <label for="slider-muk" class="text-slate-300 font-medium">ความเสียดทานจลน์ (μ_k)</label>
+                <span class="font-mono-num text-rose-400 font-semibold"><span id="disp-muk">0.25</span></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" data-step-slider="slider-muk" data-step-delta="-0.02" class="step-btn">−</button>
+                <input id="slider-muk" type="range" min="0" max="1.0" step="0.02" value="0.25" class="flex-1 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                <button type="button" data-step-slider="slider-muk" data-step-delta="0.02" class="step-btn">+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Projectile Controls (Mode 4) -->
+          <div id="ctrl-proj-v0" class="ctrl-card space-y-1.5 hidden">
+            <div class="flex justify-between text-xs">
+              <label for="slider-v0" class="text-slate-300 font-medium">🚀 อัตราเร็วต้น (v₀)</label>
+              <span class="font-mono-num text-sky-400 font-semibold"><span id="disp-v0">28.0</span> m/s</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" data-step-slider="slider-v0" data-step-delta="-1" class="step-btn">−</button>
+              <input id="slider-v0" type="range" min="5" max="50" step="0.5" value="28.0" class="flex-1 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+              <button type="button" data-step-slider="slider-v0" data-step-delta="1" class="step-btn">+</button>
+            </div>
+          </div>
+
+          <div id="ctrl-proj-angle" class="ctrl-card space-y-1.5 hidden">
+            <div class="flex justify-between text-xs">
+              <label for="slider-proj-angle" class="text-slate-300 font-medium">📐 มุมยิงโพรเจกไทล์ (θ₀)</label>
+              <span class="font-mono-num text-amber-400 font-semibold"><span id="disp-proj-angle">45</span>°</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" data-step-slider="slider-proj-angle" data-step-delta="-5" class="step-btn">−</button>
+              <input id="slider-proj-angle" type="range" min="5" max="85" step="1" value="45" class="flex-1 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+              <button type="button" data-step-slider="slider-proj-angle" data-step-delta="5" class="step-btn">+</button>
+            </div>
+          </div>
+
+          <div id="ctrl-proj-h0" class="ctrl-card space-y-1.5 hidden">
+            <div class="flex justify-between text-xs">
+              <label for="slider-h0" class="text-slate-300 font-medium">🏢 ความสูงเริ่มต้น (h₀)</label>
+              <span class="font-mono-num text-emerald-400 font-semibold"><span id="disp-h0">0.0</span> m</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" data-step-slider="slider-h0" data-step-delta="-1" class="step-btn">−</button>
+              <input id="slider-h0" type="range" min="0" max="30" step="1" value="0" class="flex-1 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+              <button type="button" data-step-slider="slider-h0" data-step-delta="1" class="step-btn">+</button>
+            </div>
+          </div>
+
+          <div id="ctrl-proj-drag" class="ctrl-card space-y-1.5 hidden">
+            <div class="flex justify-between text-xs">
+              <label for="slider-drag" class="text-slate-300 font-medium">💨 สัมประสิทธิ์แรงต้านอากาศ (b)</label>
+              <span class="font-mono-num text-rose-400 font-semibold"><span id="disp-drag">0.15</span> N·s/m</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" data-step-slider="slider-drag" data-step-delta="-0.05" class="step-btn">−</button>
+              <input id="slider-drag" type="range" min="0" max="1.5" step="0.05" value="0.15" class="flex-1 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+              <button type="button" data-step-slider="slider-drag" data-step-delta="0.05" class="step-btn">+</button>
+            </div>
+          </div>
+
+          <!-- Gravity g (All Modes) -->
+          <div id="ctrl-gravity" class="ctrl-card space-y-1.5">
+            <div class="flex justify-between text-xs">
+              <label for="slider-g" class="text-slate-300 font-medium">🌍 ความเร่งโน้มถ่วง (g)</label>
+              <span class="font-mono-num text-purple-400 font-semibold"><span id="disp-g">9.80</span> m/s²</span>
+            </div>
+            <input id="slider-g" type="range" min="1.6" max="24.8" step="0.1" value="9.8" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+            <div class="flex gap-1.5 pt-1">
+              <button type="button" data-g="9.8" class="planet-btn flex-1 py-1 rounded bg-purple-500/20 border border-purple-500/40 text-purple-300 text-[11px] font-medium">🌍 โลก (9.8)</button>
+              <button type="button" data-g="1.6" class="planet-btn flex-1 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300 text-[11px]">🌙 ดวงจันทร์ (1.6)</button>
+              <button type="button" data-g="3.7" class="planet-btn flex-1 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300 text-[11px]">🔴 ดาวอังคาร (3.7)</button>
+              <button type="button" data-g="24.8" class="planet-btn flex-1 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300 text-[11px]">🟠 ดาวพฤหัส (24.8)</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- VIEW 2 (SECONDARY PAGES): CHARTS, FORMULAS & FBD, DATA LOGGER         -->
+  <!-- Opened via the Top-Right 3-Line Hamburger Menu                        -->
+  <!-- ===================================================================== -->
+  <section id="view-secondary-pages" class="max-w-7xl w-full mx-auto px-4 py-4 flex-1 hidden flex-col gap-4">
+
+    <!-- Secondary View Header Bar & Topic Switcher -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col gap-4">
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800">
+        <div class="flex flex-wrap items-center gap-1.5">
+          <button id="subtab-kinematics" type="button" class="subtab-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/30">
+            📈 กราฟการเคลื่อนที่ (x, v, a)
+          </button>
+          <button id="subtab-energy" type="button" class="subtab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white bg-slate-800/60">
+            ⚡ กราฟงานและพลังงาน (Energy)
+          </button>
+          <button id="subtab-formulas" type="button" class="subtab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white bg-slate-800/60">
+            🧮 สมการและการแทนค่าจริง
+          </button>
+          <button id="subtab-logger" type="button" class="subtab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white bg-slate-800/60">
+            📋 ตารางบันทึกผลการทดลอง (<span id="log-count">0</span>)
+          </button>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="btn-clear-chart" type="button" class="text-xs text-slate-400 hover:text-slate-200 underline">
+            ล้างกราฟ
+          </button>
+        </div>
+      </div>
+
+      <!-- Panel 1: Kinematics Chart -->
+      <div id="panel-kinematics" class="relative h-80 w-full">
+        <canvas id="kinematics-chart"></canvas>
+      </div>
+
+      <!-- Panel 2: Energy Chart -->
+      <div id="panel-energy" class="relative h-80 w-full hidden">
+        <canvas id="energy-chart"></canvas>
+      </div>
+
+      <!-- Panel 3: Interactive Variable Solver + Step-by-step Formula & Free Body Analysis -->
+      <div id="panel-formulas" class="hidden space-y-5 text-xs md:text-sm">
+
+        <!-- Interactive Physics Equation & Unknown Variable Solver -->
+        <div class="bg-slate-950/90 border border-sky-500/30 rounded-2xl p-3.5 sm:p-5 space-y-4 shadow-lg">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                <span class="text-sky-400">🧮</span>
+                <span>เครื่องมือแก้สมการหาค่าตัวแปรไม่ทราบค่า (Interactive Physics Solver)</span>
+              </h3>
+              <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">เลือกหมวดสมการและตัวแปรที่ต้องการหาค่า ระบบจะจัดรูปสมการ แสดงวิธีทำทีละบรรทัด และส่งค่าไปจำลองได้ทันที</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="btn-solver-pull-sim" type="button" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+                📥 ดึงค่าจากหน้าจำลอง
+              </button>
+              <button id="btn-solver-push-sim" type="button" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow transition">
+                🚀 ส่งค่าไปทดสอบในแล็บ
+              </button>
+            </div>
+          </div>
+
+          <!-- Solver Category Selector Tabs -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+            <button type="button" data-solver-cat="newton" class="solver-cat-btn px-3 py-2 rounded-xl text-xs font-semibold bg-sky-500 text-slate-950 shadow text-left">
+              <span class="block font-bold">1. กฎนิวตัน & เสียดทาน</span>
+              <span class="block text-[10px] opacity-80">หา F, m, a, μ พื้นราบ</span>
+            </button>
+            <button type="button" data-solver-cat="suvat" class="solver-cat-btn px-3 py-2 rounded-xl text-xs font-medium bg-slate-800/90 text-slate-300 hover:text-white border border-slate-700 text-left">
+              <span class="block font-bold">2. สมการเคลื่อนที่ SUVAT</span>
+              <span class="block text-[10px] text-slate-400">หา s, u, v, a, t</span>
+            </button>
+            <button type="button" data-solver-cat="incline_pulley" class="solver-cat-btn px-3 py-2 rounded-xl text-xs font-medium bg-slate-800/90 text-slate-300 hover:text-white border border-slate-700 text-left">
+              <span class="block font-bold">3. พื้นเอียง & ระบบรอก</span>
+              <span class="block text-[10px] text-slate-400">หา a, T, θc, F, m₂</span>
+            </button>
+            <button type="button" data-solver-cat="projectile" class="solver-cat-btn px-3 py-2 rounded-xl text-xs font-medium bg-slate-800/90 text-slate-300 hover:text-white border border-slate-700 text-left">
+              <span class="block font-bold">4. โพรเจกไทล์ 2 มิติ</span>
+              <span class="block text-[10px] text-slate-400">หา R, Hmax, T, v₀</span>
+            </button>
+          </div>
+
+          <!-- Solver Workspace Grid: Left = Target Variable & Known Inputs, Right = Step-by-Step Solution -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+            <!-- Left 6 cols: Target Variable Dropdown & Dynamic Input Fields -->
+            <div class="lg:col-span-6 bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-3">
+              <div class="space-y-1">
+                <label for="solver-target-select" class="text-xs font-semibold text-sky-300 block">
+                  🎯 เลือกตัวแปรที่ต้องการแก้สมการหาค่า (Target Unknown):
+                </label>
+                <select id="solver-target-select" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs sm:text-sm font-semibold focus:outline-none focus:border-sky-400">
+                  <!-- Populated dynamically based on category -->
+                </select>
+              </div>
+
+              <div class="text-[11px] font-semibold text-slate-400 border-t border-slate-800 pt-2.5">
+                ✏️ กรอกค่าตัวแปรที่ทราบค่า (แตะเปลี่ยนตัวเลขเพื่อคำนวณอัตโนมัติ):
+              </div>
+
+              <div id="solver-inputs-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Right 6 cols: Rearranged Formula, Step-by-Step Substitution & Highlighted Result -->
+            <div class="lg:col-span-6 bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-3 flex flex-col justify-between">
+              <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-300">📐 การจัดรูปสมการและวิธีทำทีละขั้น:</span>
+                  <span id="solver-formula-badge" class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 font-mono-num text-[11px] font-semibold">
+                    ΣF = ma
+                  </span>
+                </div>
+
+                <div id="solver-steps-box" class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-2 font-mono-num text-xs text-slate-300 leading-relaxed">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-r from-sky-500/20 via-indigo-500/15 to-emerald-500/20 border border-sky-500/40 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <div class="text-[11px] text-sky-300 font-semibold">ผลลัพธ์จากการแก้สมการ (Solved Value)</div>
+                  <div id="solver-result-main" class="text-lg sm:text-xl font-bold font-mono-num text-white mt-0.5">
+                    a = 1.08 m/s²
+                  </div>
+                </div>
+                <div id="solver-result-sub" class="text-xs font-mono-num text-emerald-300 text-right">
+                  <!-- Secondary solved outputs if any -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Existing Live Formula Breakdown & FBD Analysis -->
+        <div id="formula-breakdown" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+
+        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <h3 class="text-sm font-bold text-white flex items-center justify-between">
+            <span>วิเคราะห์แผนภาพวัตถุอิสระปัจจุบัน (Live FBD Analysis)</span>
+            <span class="text-[11px] font-normal text-sky-400">ΣF = ma</span>
+          </h3>
+          <div id="live-analysis-box" class="space-y-2 text-xs text-slate-300 bg-slate-950/80 p-3 rounded-xl border border-slate-800/90 font-mono-num">
+            <!-- Populated dynamically -->
+          </div>
+          <div id="theory-tip-box" class="text-xs text-slate-400 leading-relaxed bg-slate-800/40 p-3 rounded-xl border border-slate-800">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 4: Data Logger Table -->
+      <div id="panel-logger" class="hidden">
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-xs text-slate-400">กดปุ่ม "📌 บันทึกจุดข้อมูล" บนหน้าทดสอบจำลองเพื่อเก็บค่าลงตารางและคัดลอกเป็น CSV</p>
+          <div class="flex gap-2">
+            <button id="btn-copy-csv" type="button" class="px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs hover:bg-sky-500/30">
+              คัดลอก CSV
+            </button>
+            <button id="btn-clear-log" type="button" class="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs hover:bg-rose-500/30">
+              ล้างตาราง
+            </button>
+          </div>
+        </div>
+        <div class="overflow-x-auto max-h-80 border border-slate-800 rounded-xl">
+          <table class="w-full text-left text-xs font-mono-num">
+            <thead class="bg-slate-800/90 text-slate-300 sticky top-0">
+              <tr>
+                <th class="py-2 px-3">#</th>
+                <th class="py-2 px-3">โหมด</th>
+                <th class="py-2 px-3">t (s)</th>
+                <th class="py-2 px-3">x (m)</th>
+                <th class="py-2 px-3">v (m/s)</th>
+                <th class="py-2 px-3">a (m/s²)</th>
+                <th class="py-2 px-3">ΣF (N)</th>
+                <th class="py-2 px-3">f (N)</th>
+                <th class="py-2 px-3">E_k (J)</th>
+              </tr>
+            </thead>
+            <tbody id="logger-tbody" class="divide-y divide-slate-800">
+              <tr>
+                <td colspan="9" class="py-6 text-center text-slate-500 font-sans">ยังไม่มีข้อมูลที่บันทึก กด "📌 บันทึกจุดข้อมูล" เพื่อเพิ่มแถว</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mobile Bottom Navigation Bar (Thumb-friendly page switcher on phones <640px) -->
+  <nav class="sm:hidden fixed bottom-0 inset-x-0 bg-slate-900/95 backdrop-blur border-t border-slate-800 z-30 grid grid-cols-5 py-1.5 px-1 text-[10px]">
+    <button type="button" data-mob-nav="lab" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-lg text-sky-400 font-bold">
+      <span class="text-base leading-none">🧪</span>
+      <span class="mt-0.5">ทดสอบแรง</span>
+    </button>
+    <button type="button" data-mob-nav="kinematics" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-lg text-slate-400">
+      <span class="text-base leading-none">📈</span>
+      <span class="mt-0.5">กราฟ v,a</span>
+    </button>
+    <button type="button" data-mob-nav="energy" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-lg text-slate-400">
+      <span class="text-base leading-none">⚡</span>
+      <span class="mt-0.5">พลังงาน</span>
+    </button>
+    <button type="button" data-mob-nav="formulas" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-lg text-slate-400">
+      <span class="text-base leading-none">🧮</span>
+      <span class="mt-0.5">สมการ</span>
+    </button>
+    <button type="button" data-mob-nav="menu" class="mob-nav-btn flex flex-col items-center justify-center py-1 rounded-lg text-slate-300">
+      <span class="text-base leading-none">☰</span>
+      <span class="mt-0.5">เมนูทั้งหมด</span>
+    </button>
+  </nav>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-16 sm:bottom-5 right-4 sm:right-5 bg-sky-500 text-slate-950 font-semibold text-xs px-4 py-2.5 rounded-xl shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+    คัดลอกข้อมูลสำเร็จ!
+  </div>
+
+  <script>
+    // =========================================================================
+    // STATE & CONFIGURATION
+    // =========================================================================
+    const state = {
+      mode: 'horizontal', // 'horizontal' | 'incline' | 'pulley' | 'projectile'
+      pulleyType: 'table', // 'table' | 'atwood'
+      running: false,
+      timeScale: 1.0,
+      t: 0,
+
+      // Shared parameters
+      m1: 5.0,
+      m2: 3.0,
+      fApp: 25.0,
+      fAngle: 0,
+      rampAngle: 25,
+      muS: 0.40,
+      muK: 0.25,
+      g: 9.8,
+
+      // Projectile parameters
+      v0: 28.0,
+      projAngle: 45,
+      h0: 0.0,
+      dragB: 0.15,
+
+      // Dynamic variables
+      x: 0,
+      v: 0,
+      a: 0,
+      y: 0,
+      vx: 0,
+      vy: 0,
+      ax: 0,
+      ay: 0,
+
+      // Forces
+      normalF: 0,
+      frictionF: 0,
+      maxStaticF: 0,
+      kineticF: 0,
+      tensionF: 0,
+      netF: 0,
+      regime: 'สมดุลสถิต (Static)',
+      thermalE: 0,
+
+      // Trajectories for Projectile mode
+      trajActual: [],
+      trajIdeal: [],
+
+      // Overlays & Vector Scale
+      showFBD: true,
+      showComponents: true,
+      showValues: true,
+      soundEnabled: false,
+      vectorScale: 1.0,
+
+      // Zoom & Pan & Camera state
+      zoom: 1.0,
+      panX: 0,
+      panY: 0,
+      camFollow: true,
+      canvasTool: 'force', // 'force' | 'pan'
+      expandedCanvas: false,
+
+      // Dragging / Panning interaction on canvas
+      dragging: false,
+      dragType: 'force', // 'force' | 'pan'
+      dragStartX: 0,
+      dragStartY: 0,
+      panStartX: 0,
+      panStartY: 0,
+      pinchStartDist: 0,
+      pinchStartZoom: 1.0,
+
+      // Chart throttling
+      lastChartSampleT: -1,
+      logs: []
+    };
+
+    // Web Audio API Synthesizer for subtle physics feedback
+    let audioCtx = null;
+    function playTone(freq = 440, duration = 0.06, type = 'sine', gainVal = 0.05) {
+      if (!state.soundEnabled) return;
+      try {
+        if (!audioCtx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AudioContext();
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        // Ignore audio errors
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.remove('opacity-0');
+      setTimeout(() => toast.classList.add('opacity-0'), 2200);
+    }
+
+    // =========================================================================
+    // CHARTS INITIALIZATION (Chart.js)
+    // =========================================================================
+    let kinematicsChart = null;
+    let energyChart = null;
+
+    function initCharts() {
+      const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            labels: { color: '#cbd5e1', font: { family: 'Sarabun, Inter, sans-serif', size: 11 } }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#94a3b8', maxTicksLimit: 8 },
+            grid: { color: 'rgba(148, 163, 184, 0.1)' },
+            title: { display: true, text: 'เวลา t (s)', color: '#94a3b8', font: { size: 11 } }
+          },
+          y: {
+            ticks: { color: '#94a3b8' },
+            grid: { color: 'rgba(148, 163, 184, 0.1)' }
+          }
+        }
+      };
+
+      const ctxK = document.getElementById('kinematics-chart').getContext('2d');
+      kinematicsChart = new Chart(ctxK, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [
+            { label: 'ตำแหน่ง x (m)', data: [], borderColor: '#f8fafc', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.15 },
+            { label: 'ความเร็ว v (m/s)', data: [], borderColor: '#38bdf8', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.15 },
+            { label: 'ความเร่ง a (m/s²)', data: [], borderColor: '#fbbf24', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.15 }
+          ]
+        },
+        options: commonOptions
+      });
+
+      const ctxE = document.getElementById('energy-chart').getContext('2d');
+      energyChart = new Chart(ctxE, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [
+            { label: 'พลังงานจลน์ E_k (J)', data: [], borderColor: '#c084fc', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.15 },
+            { label: 'พลังงานศักย์โน้มถ่วง E_p (J)', data: [], borderColor: '#34d399', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.15 },
+            { label: 'งานจากความเสียดทาน E_th (J)', data: [], borderColor: '#fb7185', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.15 }
+          ]
+        },
+        options: commonOptions
+      });
+    }
+
+    function clearCharts() {
+      if (!kinematicsChart || !energyChart) return;
+      kinematicsChart.data.labels = [];
+      kinematicsChart.data.datasets.forEach(d => { d.data = []; });
+      kinematicsChart.update();
+
+      energyChart.data.labels = [];
+      energyChart.data.datasets.forEach(d => { d.data = []; });
+      energyChart.update();
+      state.lastChartSampleT = -1;
+    }
+
+    function sampleCharts() {
+      if (state.t - state.lastChartSampleT < 0.05 && state.t !== 0) return;
+      state.lastChartSampleT = state.t;
+
+      const label = state.t.toFixed(2);
+      const posVal = state.mode === 'projectile' ? state.y : state.x;
+      const velVal = state.mode === 'projectile' ? Math.hypot(state.vx, state.vy) : state.v;
+      const accVal = state.mode === 'projectile' ? Math.hypot(state.ax, state.ay) : state.a;
+
+      kinematicsChart.data.labels.push(label);
+      kinematicsChart.data.datasets[0].data.push(Number(posVal.toFixed(2)));
+      kinematicsChart.data.datasets[1].data.push(Number(velVal.toFixed(2)));
+      kinematicsChart.data.datasets[2].data.push(Number(accVal.toFixed(2)));
+
+      if (kinematicsChart.data.labels.length > 120) {
+        kinematicsChart.data.labels.shift();
+        kinematicsChart.data.datasets.forEach(d => d.data.shift());
+      }
+      kinematicsChart.update('none');
+
+      const { ke, pe } = computeEnergies();
+      energyChart.data.labels.push(label);
+      energyChart.data.datasets[0].data.push(Number(ke.toFixed(2)));
+      energyChart.data.datasets[1].data.push(Number(pe.toFixed(2)));
+      energyChart.data.datasets[2].data.push(Number(state.thermalE.toFixed(2)));
+
+      if (energyChart.data.labels.length > 120) {
+        energyChart.data.labels.shift();
+        energyChart.data.datasets.forEach(d => d.data.shift());
+      }
+      energyChart.update('none');
+    }
+
+    function computeEnergies() {
+      if (state.mode === 'horizontal') {
+        const ke = 0.5 * state.m1 * state.v * state.v;
+        return { ke, pe: 0 };
+      } else if (state.mode === 'incline') {
+        const ke = 0.5 * state.m1 * state.v * state.v;
+        const rad = state.rampAngle * Math.PI / 180;
+        const h = Math.max(0, (5 - state.x) * Math.sin(rad));
+        const pe = state.m1 * state.g * h;
+        return { ke, pe };
+      } else if (state.mode === 'pulley') {
+        const ke = 0.5 * (state.m1 + state.m2) * state.v * state.v;
+        const pe = state.m2 * state.g * Math.max(0, 5 - state.x);
+        return { ke, pe };
+      } else {
+        const speedSq = state.vx * state.vx + state.vy * state.vy;
+        const ke = 0.5 * state.m1 * speedSq;
+        const pe = state.m1 * state.g * Math.max(0, state.y);
+        return { ke, pe };
+      }
+    }
+
+    // =========================================================================
+    // PHYSICS ENGINE (INSTANTANEOUS FORCES & RK4 / EULER INTEGRATION)
+    // =========================================================================
+    function computeInstantForces() {
+      const m1 = state.m1;
+      const m2 = state.m2;
+      const g = state.g;
+      const muS = state.muS;
+      const muK = state.muK;
+
+      if (state.mode === 'horizontal') {
+        const rad = state.fAngle * Math.PI / 180;
+        const fx = state.fApp * Math.cos(rad);
+        const fy = state.fApp * Math.sin(rad);
+
+        // Normal force cannot be negative (if upward pull exceeds weight, block lifts off)
+        const normal = Math.max(0, m1 * g - fy);
+        const fStaticMax = muS * normal;
+        const fKinetic = muK * normal;
+
+        let fFric = 0;
+        let fNet = 0;
+        let regime = '';
+
+        if (Math.abs(state.v) < 1e-3) {
+          if (Math.abs(fx) <= fStaticMax) {
+            fFric = -fx;
+            fNet = 0;
+            regime = 'สมดุลสถิต (Static Equilibrium)';
+          } else {
+            const dir = Math.sign(fx);
+            fFric = -dir * fKinetic;
+            fNet = fx + fFric;
+            regime = 'เริ่มเคลื่อนที่ (Breakaway → Kinetic)';
+          }
+        } else {
+          const dir = Math.sign(state.v);
+          fFric = -dir * fKinetic;
+          fNet = fx + fFric;
+          regime = 'กำลังเคลื่อนที่ (Kinetic Friction)';
+        }
+
+        state.normalF = normal;
+        state.maxStaticF = fStaticMax;
+        state.kineticF = fKinetic;
+        state.frictionF = fFric;
+        state.netF = fNet;
+        state.a = fNet / m1;
+        state.regime = regime;
+
+      } else if (state.mode === 'incline') {
+        // Positive x is DOWN the ramp; fApp positive is UP the ramp
+        const rad = state.rampAngle * Math.PI / 180;
+        const mgSin = m1 * g * Math.sin(rad); // pulls down-ramp (+x)
+        const mgCos = m1 * g * Math.cos(rad);
+        const normal = mgCos;
+        const fStaticMax = muS * normal;
+        const fKinetic = muK * normal;
+
+        // Driving force along +x (down-ramp): mg sin(theta) - F_app
+        const fDrive = mgSin - state.fApp;
+        let fFric = 0;
+        let fNet = 0;
+        let regime = '';
+
+        if (Math.abs(state.v) < 1e-3) {
+          if (Math.abs(fDrive) <= fStaticMax) {
+            fFric = -fDrive;
+            fNet = 0;
+            regime = 'อยู่นิ่งบนพื้นเอียง (Static)';
+          } else {
+            const dir = Math.sign(fDrive);
+            fFric = -dir * fKinetic;
+            fNet = fDrive + fFric;
+            regime = dir > 0 ? 'ไถลลงพื้นเอียง (Sliding Down)' : 'เคลื่อนที่ขึ้นพื้นเอียง (Moving Up)';
+          }
+        } else {
+          const dir = Math.sign(state.v);
+          fFric = -dir * fKinetic;
+          fNet = fDrive + fFric;
+          regime = dir > 0 ? 'ไถลลงพื้นเอียง (Sliding Down)' : 'เคลื่อนที่ขึ้นพื้นเอียง (Moving Up)';
+        }
+
+        state.normalF = normal;
+        state.maxStaticF = fStaticMax;
+        state.kineticF = fKinetic;
+        state.frictionF = fFric;
+        state.netF = fNet;
+        state.a = fNet / m1;
+        state.regime = regime;
+
+      } else if (state.mode === 'pulley') {
+        const totalM = m1 + m2;
+        if (state.pulleyType === 'table') {
+          const normal = m1 * g;
+          const fStaticMax = muS * normal;
+          const fKinetic = muK * normal;
+          const fDrive = m2 * g; // pulls +x (right / down)
+
+          let fFric = 0;
+          let fNet = 0;
+          let regime = '';
+
+          if (Math.abs(state.v) < 1e-3) {
+            if (fDrive <= fStaticMax) {
+              fFric = -fDrive;
+              fNet = 0;
+              state.a = 0;
+              state.tensionF = m2 * g;
+              regime = 'สมดุลสถิต (แรงตึงเชือกต้านพอดี)';
+            } else {
+              fFric = -fKinetic;
+              fNet = fDrive + fFric;
+              state.a = fNet / totalM;
+              state.tensionF = m2 * (g - state.a);
+              regime = 'กำลังเคลื่อนที่ด้วยความเร่งคงตัว';
+            }
+          } else {
+            const dir = Math.sign(state.v);
+            fFric = -dir * fKinetic;
+            fNet = fDrive + fFric;
+            state.a = fNet / totalM;
+            state.tensionF = m2 * (g - state.a);
+            regime = 'กำลังเคลื่อนที่ (Kinetic)';
+          }
+
+          state.normalF = normal;
+          state.maxStaticF = fStaticMax;
+          state.kineticF = fKinetic;
+          state.frictionF = fFric;
+          state.netF = fNet;
+          state.regime = regime;
+        } else {
+          // Classic Atwood machine (vertical hanging masses m1 and m2)
+          const fDrive = (m2 - m1) * g;
+          state.normalF = 0;
+          state.maxStaticF = 0;
+          state.kineticF = 0;
+          state.frictionF = 0;
+          state.netF = fDrive;
+          state.a = fDrive / totalM;
+          state.tensionF = (2 * m1 * m2 * g) / totalM;
+          state.regime = Math.abs(fDrive) < 1e-3 ? 'สมดุล (m₁ = m₂)' : (fDrive > 0 ? 'm₂ เคลื่อนที่ลง / m₁ เคลื่อนที่ขึ้น' : 'm₁ เคลื่อนที่ลง / m₂ เคลื่อนที่ขึ้น');
+        }
+
+      } else if (state.mode === 'projectile') {
+        const b = state.dragB;
+        const fxDrag = -b * state.vx;
+        const fyDrag = -b * state.vy;
+        const fDragMag = Math.hypot(fxDrag, fyDrag);
+
+        state.ax = fxDrag / m1;
+        state.ay = -g + (fyDrag / m1);
+        state.frictionF = fDragMag;
+        state.netF = Math.hypot(m1 * state.ax, m1 * state.ay);
+        state.a = Math.hypot(state.ax, state.ay);
+        state.v = Math.hypot(state.vx, state.vy);
+        state.regime = state.y <= 0 && state.t > 0.05 ? 'ตกถึงพื้นแล้ว (Landed)' : 'กำลังเคลื่อนที่ในอากาศ (In Flight)';
+      }
+    }
+
+    function precomputeIdealProjectile() {
+      state.trajIdeal = [];
+      const rad = state.projAngle * Math.PI / 180;
+      const vx0 = state.v0 * Math.cos(rad);
+      const vy0 = state.v0 * Math.sin(rad);
+      const g = state.g;
+      const h0 = state.h0;
+
+      const disc = vy0 * vy0 + 2 * g * h0;
+      const tFlight = (vy0 + Math.sqrt(Math.max(0, disc))) / g;
+      const steps = 80;
+      for (let i = 0; i <= steps; i++) {
+        const t = (i / steps) * tFlight;
+        const x = vx0 * t;
+        const y = h0 + vy0 * t - 0.5 * g * t * t;
+        state.trajIdeal.push({ x, y: Math.max(0, y) });
+      }
+    }
+
+    function stepPhysics(dt) {
+      computeInstantForces();
+
+      if (state.mode === 'projectile') {
+        if (state.t === 0 && state.trajActual.length === 0) {
+          const rad = state.projAngle * Math.PI / 180;
+          state.x = 0;
+          state.y = state.h0;
+          state.vx = state.v0 * Math.cos(rad);
+          state.vy = state.v0 * Math.sin(rad);
+          state.trajActual.push({ x: state.x, y: state.y });
+          precomputeIdealProjectile();
+          computeInstantForces();
+        }
+
+        if (state.y <= 0 && state.t > 0.05 && state.vy <= 0) {
+          state.y = 0;
+          state.vx = 0;
+          state.vy = 0;
+          state.running = false;
+          playTone(180, 0.12, 'triangle', 0.08);
+          updatePlayButtonUI();
+          return;
+        }
+
+        const speedBefore = Math.hypot(state.vx, state.vy);
+        state.vx += state.ax * dt;
+        state.vy += state.ay * dt;
+        state.x += state.vx * dt;
+        state.y += state.vy * dt;
+        state.t += dt;
+
+        // Thermal energy dissipated by air drag
+        state.thermalE += state.dragB * speedBefore * speedBefore * dt;
+
+        if (state.y <= 0 && state.t > 0.05) {
+          state.y = 0;
+          state.running = false;
+          playTone(180, 0.12, 'triangle', 0.08);
+          updatePlayButtonUI();
+        }
+        state.trajActual.push({ x: state.x, y: state.y });
+
+      } else {
+        // 1D modes (horizontal, incline, pulley)
+        const prevV = state.v;
+        const nextV = prevV + state.a * dt;
+
+        // Check zero-crossing if no driving force is able to overcome static friction
+        if (prevV !== 0 && Math.sign(prevV) !== Math.sign(nextV)) {
+          // Verify if driving force exceeds static friction at v = 0
+          state.v = 0;
+          computeInstantForces();
+          if (state.netF === 0) {
+            state.v = 0;
+            state.a = 0;
+          } else {
+            state.v = nextV;
+          }
+        } else {
+          state.v = nextV;
+        }
+
+        const dx = state.v * dt;
+        state.x += dx;
+        state.t += dt;
+        state.thermalE += Math.abs(state.frictionF * dx);
+
+        // Bounds for pulley mode so blocks don't crash through pulley
+        if (state.mode === 'pulley') {
+          if (state.x >= 4.5) {
+            state.x = 4.5;
+            state.v = 0;
+            state.a = 0;
+            state.running = false;
+            playTone(200, 0.1, 'sawtooth', 0.06);
+            updatePlayButtonUI();
+          } else if (state.x <= -3.5) {
+            state.x = -3.5;
+            state.v = 0;
+            state.a = 0;
+            state.running = false;
+            playTone(200, 0.1, 'sawtooth', 0.06);
+            updatePlayButtonUI();
+          }
+        }
+      }
+
+      computeInstantForces();
+      sampleCharts();
+    }
+
+    // =========================================================================
+    // CANVAS RENDERING & FREE-BODY DIAGRAM VECTORS
+    // =========================================================================
+    const canvas = document.getElementById('sim-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      const container = document.getElementById('canvas-container');
+      const rect = container.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      renderScene();
+    }
+
+    function drawArrow(x1, y1, x2, y2, color, label = '', dashed = false) {
+      const vScale = state.vectorScale || 1.0;
+      const dx = (x2 - x1) * vScale;
+      const dy = (y2 - y1) * vScale;
+      const tx2 = x1 + dx;
+      const ty2 = y1 + dy;
+      const len = Math.hypot(dx, dy);
+      if (len < 3) return;
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = dashed ? 1.8 : 2.8;
+      if (dashed) ctx.setLineDash([5, 4]);
+
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(tx2, ty2);
+      ctx.stroke();
+
+      ctx.setLineDash([]);
+      const angle = Math.atan2(dy, dx);
+      const headLen = Math.min(11, len * 0.35);
+      ctx.beginPath();
+      ctx.moveTo(tx2, ty2);
+      ctx.lineTo(tx2 - headLen * Math.cos(angle - Math.PI / 6), ty2 - headLen * Math.sin(angle - Math.PI / 6));
+      ctx.lineTo(tx2 - headLen * Math.cos(angle + Math.PI / 6), ty2 - headLen * Math.sin(angle + Math.PI / 6));
+      ctx.closePath();
+      ctx.fill();
+
+      if (label) {
+        ctx.font = '600 11px Sarabun, Inter, sans-serif';
+        const offsetX = Math.cos(angle) * 12 + (dy >= 0 ? 6 : -6);
+        const offsetY = Math.sin(angle) * 12 + (dx >= 0 ? -6 : 12);
+        const textWidth = ctx.measureText(label).width;
+        const bx = tx2 + offsetX - textWidth / 2 - 4;
+        const by = ty2 + offsetY - 11;
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+        ctx.fillRect(bx, by, textWidth + 8, 16);
+        ctx.strokeStyle = 'rgba(71, 85, 105, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(bx, by, textWidth + 8, 16);
+        ctx.fillStyle = color;
+        ctx.fillText(label, bx + 4, by + 12);
+      }
+      ctx.restore();
+    }
+
+    function setZoom(newZoom, pivotX = null, pivotY = null) {
+      const clamped = Math.max(0.4, Math.min(3.0, Number(newZoom.toFixed(2))));
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      const px = pivotX !== null ? pivotX : w / 2;
+      const py = pivotY !== null ? pivotY : h / 2;
+
+      // Keep world point under cursor stationary while zooming
+      const ratio = clamped / state.zoom;
+      state.panX = (px - w / 2) * (1 - ratio) + state.panX * ratio;
+      state.panY = (py - h / 2) * (1 - ratio) + state.panY * ratio;
+      state.zoom = clamped;
+
+      const sliderZoom = document.getElementById('slider-zoom');
+      const btnReset = document.getElementById('btn-zoom-reset');
+      if (sliderZoom) sliderZoom.value = state.zoom;
+      if (btnReset) btnReset.textContent = `${Math.round(state.zoom * 100)}%`;
+      renderScene();
+    }
+
+    function resetView() {
+      state.zoom = 1.0;
+      state.panX = 0;
+      state.panY = 0;
+      const sliderZoom = document.getElementById('slider-zoom');
+      const btnReset = document.getElementById('btn-zoom-reset');
+      if (sliderZoom) sliderZoom.value = 1.0;
+      if (btnReset) btnReset.textContent = '100%';
+      renderScene();
+    }
+
+    function renderScene() {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.save();
+      // Apply camera Pan & Zoom transformation around canvas center
+      ctx.translate(w / 2 + state.panX, h / 2 + state.panY);
+      ctx.scale(state.zoom, state.zoom);
+      ctx.translate(-w / 2, -h / 2);
+
+      // Extended background subtle grid so zooming out or panning never reveals blank void
+      ctx.save();
+      ctx.strokeStyle = 'rgba(51, 65, 85, 0.28)';
+      ctx.lineWidth = 1 / state.zoom;
+      const gridStep = 40;
+      const minX = -w * 2;
+      const maxX = w * 3;
+      const minY = -h * 2;
+      const maxY = h * 3;
+      for (let gx = Math.floor(minX / gridStep) * gridStep; gx < maxX; gx += gridStep) {
+        ctx.beginPath();
+        ctx.moveTo(gx, minY);
+        ctx.lineTo(gx, maxY);
+        ctx.stroke();
+      }
+      for (let gy = Math.floor(minY / gridStep) * gridStep; gy < maxY; gy += gridStep) {
+        ctx.beginPath();
+        ctx.moveTo(minX, gy);
+        ctx.lineTo(maxX, gy);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      if (state.mode === 'horizontal') {
+        renderHorizontalMode(w, h);
+      } else if (state.mode === 'incline') {
+        renderInclineMode(w, h);
+      } else if (state.mode === 'pulley') {
+        renderPulleyMode(w, h);
+      } else if (state.mode === 'projectile') {
+        renderProjectileMode(w, h);
+      }
+
+      ctx.restore();
+
+      // Draw crisp HUD Scale Bar in screen space (responsive position so it never overlaps buttons on mobile)
+      ctx.save();
+      const basePxPerMeter = state.mode === 'projectile' ? 8 : 38;
+      const unitMeters = state.mode === 'projectile' ? 5 : 1;
+      const barPx = Math.max(24, Math.min(120, basePxPerMeter * unitMeters * state.zoom));
+      const isMobileCanvas = w < 600;
+      const barX = isMobileCanvas ? 12 : 16;
+      const barY = isMobileCanvas ? 28 : h - 52;
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(barX, barY);
+      ctx.lineTo(barX + barPx, barY);
+      ctx.moveTo(barX, barY - 4);
+      ctx.lineTo(barX, barY + 4);
+      ctx.moveTo(barX + barPx, barY - 4);
+      ctx.lineTo(barX + barPx, barY + 4);
+      ctx.stroke();
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '600 10px Inter, sans-serif';
+      ctx.fillText(`≈ ${unitMeters} m (${Math.round(state.zoom * 100)}%)`, barX, barY - 6);
+      ctx.restore();
+    }
+
+    function renderHorizontalMode(w, h) {
+      const groundY = h * 0.72;
+      const pixelsPerMeter = 38;
+      // Camera follows object when camFollow is active, otherwise object moves across world ruler
+      const camOffset = state.camFollow ? state.x * pixelsPerMeter : 0;
+      const objOffset = state.camFollow ? 0 : state.x * pixelsPerMeter;
+
+      // Extended ground surface for zoomed-out / panned views
+      const extLeft = -w * 2;
+      const extRight = w * 3;
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(extLeft, groundY, extRight - extLeft, h * 2);
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(extLeft, groundY);
+      ctx.lineTo(extRight, groundY);
+      ctx.stroke();
+
+      // Ruler markers along the ground
+      ctx.fillStyle = '#64748b';
+      ctx.font = '11px Inter, monospace';
+      const startMeter = Math.floor((camOffset - w * 2) / pixelsPerMeter) - 2;
+      const endMeter = Math.ceil((camOffset + w * 2) / pixelsPerMeter) + 2;
+      for (let m = startMeter; m <= endMeter; m++) {
+        const sx = w / 2 + m * pixelsPerMeter - camOffset;
+        ctx.beginPath();
+        ctx.moveTo(sx, groundY);
+        ctx.lineTo(sx, groundY + 8);
+        ctx.stroke();
+        ctx.fillText(`${m}m`, sx - 8, groundY + 22);
+      }
+
+      // Block dimensions
+      const boxW = Math.min(96, 54 + state.m1 * 1.6);
+      const boxH = Math.min(72, 42 + state.m1 * 1.1);
+      const cx = w / 2 + objOffset;
+      const cy = groundY - boxH / 2;
+
+      // Draw Block
+      ctx.save();
+      ctx.fillStyle = '#0284c7';
+      ctx.strokeStyle = '#7dd3fc';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(cx - boxW / 2, cy - boxH / 2, boxW, boxH, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 13px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${state.m1.toFixed(1)} kg`, cx, cy + 5);
+      ctx.restore();
+
+      // FBD Vectors
+      if (state.showFBD) {
+        const scale = 1.15;
+        const rad = state.fAngle * Math.PI / 180;
+        const fx = state.fApp * Math.cos(rad);
+        const fy = state.fApp * Math.sin(rad);
+
+        // Weight mg (down)
+        const mg = state.m1 * state.g;
+        drawArrow(cx, cy, cx, cy + Math.min(110, mg * scale), '#c084fc',
+          state.showValues ? `mg = ${mg.toFixed(1)} N` : 'mg');
+
+        // Normal force N (up)
+        if (state.normalF > 0.1) {
+          drawArrow(cx, cy, cx, cy - Math.min(110, state.normalF * scale), '#34d399',
+            state.showValues ? `N = ${state.normalF.toFixed(1)} N` : 'N');
+        }
+
+        // Applied force F_app
+        if (Math.abs(state.fApp) > 0.1) {
+          const lenF = Math.min(130, Math.abs(state.fApp) * scale * 1.3);
+          const dirSign = Math.sign(state.fApp);
+          const ex = cx + dirSign * lenF * Math.cos(rad);
+          const ey = cy - lenF * Math.sin(rad);
+
+          if (state.showComponents && Math.abs(state.fAngle) > 0) {
+            drawArrow(cx, cy, ex, cy, '#38bdf8',
+              state.showValues ? `F_x = ${fx.toFixed(1)} N` : 'F_x', true);
+            drawArrow(cx, cy, cx, ey, '#38bdf8',
+              state.showValues ? `F_y = ${fy.toFixed(1)} N` : 'F_y', true);
+          }
+
+          drawArrow(cx, cy, ex, ey, '#38bdf8',
+            state.showValues ? `F_app = ${state.fApp.toFixed(1)} N` : 'F_app');
+        }
+
+        // Friction force f (along ground surface)
+        if (Math.abs(state.frictionF) > 0.1) {
+          const fLen = Math.min(120, Math.abs(state.frictionF) * scale * 1.3);
+          const fDir = Math.sign(state.frictionF);
+          drawArrow(cx, groundY - 4, cx + fDir * fLen, groundY - 4, '#fb7185',
+            state.showValues ? `f = ${Math.abs(state.frictionF).toFixed(1)} N` : 'f');
+        }
+
+        // Net Force above block
+        if (Math.abs(state.netF) > 0.1) {
+          const netLen = Math.min(120, Math.abs(state.netF) * scale * 1.3);
+          const netDir = Math.sign(state.netF);
+          drawArrow(cx, cy - boxH / 2 - 22, cx + netDir * netLen, cy - boxH / 2 - 22, '#fbbf24',
+            state.showValues ? `ΣF = ${state.netF.toFixed(1)} N` : 'ΣF');
+        }
+      }
+    }
+
+    function renderInclineMode(w, h) {
+      const rad = state.rampAngle * Math.PI / 180;
+      const baseX = w * 0.18;
+      const baseY = h * 0.82;
+      const rampLenPx = Math.min(w * 0.65, 420);
+
+      // Top of ramp is at (baseX, baseY - rampLenPx * sin(rad)), bottom is at (baseX + rampLenPx * cos(rad), baseY)
+      const topX = baseX;
+      const topY = baseY - rampLenPx * Math.sin(rad);
+      const botX = baseX + rampLenPx * Math.cos(rad);
+      const botY = baseY;
+
+      // Draw Ramp Wedge
+      ctx.save();
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(topX, topY);
+      ctx.lineTo(botX, botY);
+      ctx.lineTo(topX, botY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Angle arc
+      if (state.rampAngle > 2) {
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(botX, botY, 44, Math.PI, Math.PI + rad, false);
+        ctx.stroke();
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 12px Inter, sans-serif';
+        ctx.fillText(`θ = ${state.rampAngle}°`, botX - 82, botY - 10);
+      }
+      ctx.restore();
+
+      // Block position along ramp (state.x in meters, clamp visually to ramp)
+      const sMeters = ((state.x % 8) + 8) % 8; // wrap nicely if sliding far
+      const frac = Math.min(0.88, Math.max(0.15, 0.25 + (state.x * 0.08)));
+      const bx = topX + frac * (botX - topX);
+      const by = topY + frac * (botY - topY);
+
+      const boxW = 64;
+      const boxH = 44;
+
+      ctx.save();
+      ctx.translate(bx, by);
+      ctx.rotate(rad);
+
+      // Block sitting on ramp (surface is y=0 in rotated frame, so block center is at (0, -boxH/2))
+      ctx.fillStyle = '#0284c7';
+      ctx.strokeStyle = '#7dd3fc';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(-boxW / 2, -boxH, boxW, boxH, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 12px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${state.m1.toFixed(1)} kg`, 0, -boxH / 2 + 4);
+      ctx.restore();
+
+      // Center of mass in world coordinates
+      const cmX = bx + (boxH / 2) * Math.sin(rad);
+      const cmY = by - (boxH / 2) * Math.cos(rad);
+
+      if (state.showFBD) {
+        const scale = 1.2;
+        const mg = state.m1 * state.g;
+        const mgSin = mg * Math.sin(rad);
+        const mgCos = mg * Math.cos(rad);
+
+        // Straight down weight mg
+        drawArrow(cmX, cmY, cmX, cmY + Math.min(110, mg * scale), '#c084fc',
+          state.showValues ? `mg = ${mg.toFixed(1)} N` : 'mg');
+
+        // Normal force perpendicular to ramp
+        const nLen = Math.min(110, state.normalF * scale);
+        drawArrow(cmX, cmY, cmX + nLen * Math.sin(rad), cmY - nLen * Math.cos(rad), '#34d399',
+          state.showValues ? `N = ${state.normalF.toFixed(1)} N` : 'N');
+
+        // Components of mg along and perpendicular to ramp
+        if (state.showComponents && state.rampAngle > 0) {
+          const sinLen = Math.min(110, mgSin * scale * 1.4);
+          const cosLen = Math.min(110, mgCos * scale);
+          drawArrow(cmX, cmY, cmX + sinLen * Math.cos(rad), cmY + sinLen * Math.sin(rad), '#c084fc',
+            state.showValues ? `mg sinθ = ${mgSin.toFixed(1)} N` : 'mg sinθ', true);
+          drawArrow(cmX, cmY, cmX - cosLen * Math.sin(rad), cmY + cosLen * Math.cos(rad), '#c084fc',
+            state.showValues ? `mg cosθ = ${mgCos.toFixed(1)} N` : 'mg cosθ', true);
+        }
+
+        // Applied force F_app (up the ramp is positive fApp)
+        if (Math.abs(state.fApp) > 0.1) {
+          const fLen = Math.min(110, Math.abs(state.fApp) * scale * 1.3);
+          const dirUp = Math.sign(state.fApp); // +1 means up-ramp (-cos, -sin)
+          drawArrow(
+            cmX, cmY,
+            cmX - dirUp * fLen * Math.cos(rad),
+            cmY - dirUp * fLen * Math.sin(rad),
+            '#38bdf8',
+            state.showValues ? `F_app = ${state.fApp.toFixed(1)} N` : 'F_app'
+          );
+        }
+
+        // Friction force along ramp (+frictionF is down-ramp, -frictionF is up-ramp)
+        if (Math.abs(state.frictionF) > 0.1) {
+          const fLen = Math.min(110, Math.abs(state.frictionF) * scale * 1.4);
+          const fSign = Math.sign(state.frictionF); // +1 down-ramp, -1 up-ramp
+          drawArrow(
+            bx, by,
+            bx + fSign * fLen * Math.cos(rad),
+            by + fSign * fLen * Math.sin(rad),
+            '#fb7185',
+            state.showValues ? `f = ${Math.abs(state.frictionF).toFixed(1)} N` : 'f'
+          );
+        }
+      }
+    }
+
+    function renderPulleyMode(w, h) {
+      if (state.pulleyType === 'table') {
+        const tableY = h * 0.45;
+        const tableRightX = w * 0.62;
+        const pulleyR = 22;
+        const pulleyX = tableRightX + pulleyR;
+        const pulleyY = tableY - pulleyR;
+
+        // Draw Table
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(w * 0.08, tableY, tableRightX - w * 0.08, h - tableY);
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(w * 0.08, tableY);
+        ctx.lineTo(tableRightX, tableY);
+        ctx.lineTo(tableRightX, h);
+        ctx.stroke();
+
+        // Pulley mount & wheel
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(tableRightX, tableY);
+        ctx.lineTo(pulleyX, pulleyY);
+        ctx.stroke();
+
+        ctx.fillStyle = '#334155';
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(pulleyX, pulleyY, pulleyR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Positions of m1 and m2 based on state.x
+        const pxPerM = 28;
+        const m1X = Math.min(tableRightX - 55, Math.max(w * 0.16, w * 0.34 + state.x * pxPerM));
+        const m1Y = tableY - 24;
+        const m2X = pulleyX + pulleyR;
+        const m2Y = Math.min(h - 45, Math.max(pulleyY + 45, pulleyY + 95 + state.x * pxPerM));
+
+        // Rope
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(m1X + 32, pulleyY - pulleyR);
+        ctx.lineTo(pulleyX, pulleyY - pulleyR);
+        ctx.arc(pulleyX, pulleyY, pulleyR, -Math.PI / 2, 0);
+        ctx.lineTo(m2X, m2Y - 24);
+        ctx.stroke();
+
+        // Block m1 on table
+        ctx.fillStyle = '#0284c7';
+        ctx.strokeStyle = '#7dd3fc';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(m1X - 32, m1Y - 24, 64, 48, 6);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 12px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`m₁=${state.m1}kg`, m1X, m1Y + 4);
+
+        // Block m2 hanging
+        ctx.fillStyle = '#d97706';
+        ctx.strokeStyle = '#fde68a';
+        ctx.beginPath();
+        ctx.roundRect(m2X - 28, m2Y - 24, 56, 48, 6);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#fff';
+        ctx.fillText(`m₂=${state.m2}kg`, m2X, m2Y + 4);
+
+        if (state.showFBD) {
+          const scale = 1.1;
+          // Tension on m1
+          drawArrow(m1X + 32, m1Y, m1X + 32 + Math.min(90, state.tensionF * scale), m1Y, '#34d399',
+            state.showValues ? `T = ${state.tensionF.toFixed(1)} N` : 'T');
+          // Friction on m1
+          if (Math.abs(state.frictionF) > 0.1) {
+            const fDir = Math.sign(state.frictionF);
+            drawArrow(m1X, tableY - 3, m1X + fDir * Math.min(90, Math.abs(state.frictionF) * scale), tableY - 3, '#fb7185',
+              state.showValues ? `f = ${Math.abs(state.frictionF).toFixed(1)} N` : 'f');
+          }
+          // Tension & Weight on m2
+          drawArrow(m2X, m2Y - 24, m2X, m2Y - 24 - Math.min(90, state.tensionF * scale), '#34d399',
+            state.showValues ? `T = ${state.tensionF.toFixed(1)} N` : 'T');
+          const w2 = state.m2 * state.g;
+          drawArrow(m2X, m2Y + 24, m2X, m2Y + 24 + Math.min(90, w2 * scale), '#c084fc',
+            state.showValues ? `m₂g = ${w2.toFixed(1)} N` : 'm₂g');
+        }
+      } else {
+        // Classic Atwood Machine
+        const pulleyX = w * 0.5;
+        const pulleyY = h * 0.22;
+        const pulleyR = 34;
+
+        // Ceiling support
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(pulleyX - 60, 12);
+        ctx.lineTo(pulleyX + 60, 12);
+        ctx.moveTo(pulleyX, 12);
+        ctx.lineTo(pulleyX, pulleyY);
+        ctx.stroke();
+
+        // Wheel
+        ctx.fillStyle = '#334155';
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(pulleyX, pulleyY, pulleyR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        const pxPerM = 24;
+        const leftX = pulleyX - pulleyR;
+        const rightX = pulleyX + pulleyR;
+        const leftY = Math.min(h - 50, Math.max(pulleyY + 55, h * 0.55 - state.x * pxPerM));
+        const rightY = Math.min(h - 50, Math.max(pulleyY + 55, h * 0.55 + state.x * pxPerM));
+
+        // Rope
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(leftX, leftY - 24);
+        ctx.lineTo(leftX, pulleyY);
+        ctx.arc(pulleyX, pulleyY, pulleyR, Math.PI, 0);
+        ctx.lineTo(rightX, rightY - 24);
+        ctx.stroke();
+
+        // Left block m1
+        ctx.fillStyle = '#0284c7';
+        ctx.strokeStyle = '#7dd3fc';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(leftX - 28, leftY - 24, 56, 48, 6);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 12px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`m₁=${state.m1}kg`, leftX, leftY + 4);
+
+        // Right block m2
+        ctx.fillStyle = '#d97706';
+        ctx.strokeStyle = '#fde68a';
+        ctx.beginPath();
+        ctx.roundRect(rightX - 28, rightY - 24, 56, 48, 6);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#fff';
+        ctx.fillText(`m₂=${state.m2}kg`, rightX, rightY + 4);
+
+        if (state.showFBD) {
+          const scale = 0.85;
+          const w1 = state.m1 * state.g;
+          const w2 = state.m2 * state.g;
+          drawArrow(leftX, leftY - 24, leftX, leftY - 24 - Math.min(80, state.tensionF * scale), '#34d399',
+            state.showValues ? `T = ${state.tensionF.toFixed(1)} N` : 'T');
+          drawArrow(leftX, leftY + 24, leftX, leftY + 24 + Math.min(80, w1 * scale), '#c084fc',
+            state.showValues ? `m₁g = ${w1.toFixed(1)} N` : 'm₁g');
+
+          drawArrow(rightX, rightY - 24, rightX, rightY - 24 - Math.min(80, state.tensionF * scale), '#34d399',
+            state.showValues ? `T = ${state.tensionF.toFixed(1)} N` : 'T');
+          drawArrow(rightX, rightY + 24, rightX, rightY + 24 + Math.min(80, w2 * scale), '#c084fc',
+            state.showValues ? `m₂g = ${w2.toFixed(1)} N` : 'm₂g');
+        }
+      }
+    }
+
+    function renderProjectileMode(w, h) {
+      const groundY = h * 0.84;
+      const originX = w * 0.08;
+
+      if (state.trajIdeal.length === 0) precomputeIdealProjectile();
+
+      // Dynamic scale so full ideal trajectory fits nicely
+      const maxIdealX = Math.max(40, ...state.trajIdeal.map(p => p.x));
+      const maxIdealY = Math.max(20, ...state.trajIdeal.map(p => p.y));
+      const scaleX = (w * 0.82) / maxIdealX;
+      const scaleY = (h * 0.68) / maxIdealY;
+      const scale = Math.min(scaleX, scaleY);
+
+      const toScreenX = (xm) => originX + xm * scale;
+      const toScreenY = (ym) => groundY - ym * scale;
+
+      // Extended Ground
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(-w * 2, groundY, w * 5, h * 2);
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(-w * 2, groundY);
+      ctx.lineTo(w * 3, groundY);
+      ctx.stroke();
+
+      // Ideal vacuum trajectory (dashed)
+      ctx.save();
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.55)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      state.trajIdeal.forEach((pt, idx) => {
+        const sx = toScreenX(pt.x);
+        const sy = toScreenY(pt.y);
+        if (idx === 0) ctx.moveTo(sx, sy);
+        else ctx.lineTo(sx, sy);
+      });
+      ctx.stroke();
+      ctx.restore();
+
+      // Actual trajectory with air drag
+      if (state.trajActual.length > 1) {
+        ctx.save();
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        state.trajActual.forEach((pt, idx) => {
+          const sx = toScreenX(pt.x);
+          const sy = toScreenY(pt.y);
+          if (idx === 0) ctx.moveTo(sx, sy);
+          else ctx.lineTo(sx, sy);
+        });
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Current Projectile Position
+      const curX = state.t === 0 ? 0 : state.x;
+      const curY = state.t === 0 ? state.h0 : state.y;
+      const px = toScreenX(curX);
+      const py = toScreenY(curY);
+
+      // Launch Tower if h0 > 0
+      if (state.h0 > 0) {
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(originX - 10, toScreenY(state.h0), 20, groundY - toScreenY(state.h0));
+      }
+
+      // Draw Projectile Ball
+      ctx.fillStyle = '#38bdf8';
+      ctx.strokeStyle = '#e0f2fe';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(px, py, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Vectors on Projectile
+      if (state.showFBD) {
+        const rad = state.projAngle * Math.PI / 180;
+        const vx = state.t === 0 ? state.v0 * Math.cos(rad) : state.vx;
+        const vy = state.t === 0 ? state.v0 * Math.sin(rad) : state.vy;
+
+        // Velocity components
+        if (state.showComponents) {
+          drawArrow(px, py, px + vx * 1.8, py, '#38bdf8',
+            state.showValues ? `v_x = ${vx.toFixed(1)} m/s` : 'v_x', true);
+          drawArrow(px, py, px, py - vy * 1.8, '#38bdf8',
+            state.showValues ? `v_y = ${vy.toFixed(1)} m/s` : 'v_y', true);
+        }
+
+        // Gravity force mg
+        const mg = state.m1 * state.g;
+        drawArrow(px, py, px, py + Math.min(85, mg * 1.1), '#c084fc',
+          state.showValues ? `mg = ${mg.toFixed(1)} N` : 'mg');
+
+        // Air Drag force opposite to velocity
+        if (state.dragB > 0 && Math.hypot(vx, vy) > 0.2) {
+          const fxD = -state.dragB * vx;
+          const fyD = -state.dragB * vy;
+          const fDragMag = Math.hypot(fxD, fyD);
+          drawArrow(px, py, px + fxD * 6, py - fyD * 6, '#fb7185',
+            state.showValues ? `F_drag = ${fDragMag.toFixed(1)} N` : 'F_drag');
+        }
+      }
+    }
+
+    // =========================================================================
+    // UI READOUTS & FORMULA EXPLANATION UPDATES
+    // =========================================================================
+    function updateUIReadouts() {
+      computeInstantForces();
+
+      document.getElementById('readout-time').textContent = state.t.toFixed(2);
+      const posVal = state.mode === 'projectile' ? state.x : state.x;
+      const velVal = state.mode === 'projectile' ? Math.hypot(state.vx, state.vy) : state.v;
+      const accVal = state.mode === 'projectile' ? Math.hypot(state.ax, state.ay) : state.a;
+
+      document.getElementById('val-pos').textContent = posVal.toFixed(2);
+      document.getElementById('val-vel').textContent = velVal.toFixed(2);
+      document.getElementById('val-acc').textContent = accVal.toFixed(2);
+      document.getElementById('val-fnet').textContent = state.netF.toFixed(2);
+      document.getElementById('val-ffric').textContent = Math.abs(state.frictionF).toFixed(2);
+
+      const { ke } = computeEnergies();
+      document.getElementById('val-ke').textContent = ke.toFixed(2);
+      document.getElementById('regime-badge').textContent = state.regime;
+
+      // Sync direct force input box
+      const inputFapp = document.getElementById('input-fapp');
+      if (inputFapp && document.activeElement !== inputFapp) {
+        inputFapp.value = Number(state.fApp.toFixed(1));
+      }
+
+      // Update Live Force Balance Meter
+      const balanceCard = document.getElementById('force-balance-card');
+      if (balanceCard) {
+        balanceCard.classList.toggle('hidden', state.mode === 'projectile' || (state.mode === 'pulley' && state.pulleyType === 'atwood'));
+        let driveF = 0;
+        if (state.mode === 'horizontal') {
+          driveF = Math.abs(state.fApp * Math.cos(state.fAngle * Math.PI / 180));
+        } else if (state.mode === 'incline') {
+          const mgSin = state.m1 * state.g * Math.sin(state.rampAngle * Math.PI / 180);
+          driveF = Math.abs(mgSin - state.fApp);
+        } else if (state.mode === 'pulley') {
+          driveF = state.m2 * state.g;
+        }
+        const fsMax = state.maxStaticF;
+        document.getElementById('balance-drive-val').textContent = `${driveF.toFixed(1)} N`;
+        document.getElementById('balance-fsmax-val').textContent = `${fsMax.toFixed(1)} N`;
+
+        const ratio = fsMax > 0.001 ? Math.min(100, (driveF / fsMax) * 100) : (driveF > 0 ? 100 : 0);
+        const barFill = document.getElementById('balance-bar-fill');
+        const pill = document.getElementById('balance-status-pill');
+        barFill.style.width = `${ratio}%`;
+
+        if (driveF > fsMax + 0.01 || Math.abs(state.v) > 1e-3) {
+          barFill.className = 'h-full bg-gradient-to-r from-sky-500 to-emerald-400 transition-all duration-150';
+          pill.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+          pill.textContent = '🔓 ชนะแรงเสียดทาน (เคลื่อนที่)';
+        } else if (Math.abs(driveF - fsMax) <= 0.05 && fsMax > 0) {
+          barFill.className = 'h-full bg-gradient-to-r from-amber-500 to-rose-400 transition-all duration-150';
+          pill.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+          pill.textContent = '⚖️ ปริ่มไถล (F = fs,max พอดี)';
+        } else {
+          barFill.className = 'h-full bg-gradient-to-r from-slate-500 to-amber-400 transition-all duration-150';
+          pill.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700';
+          pill.textContent = '🔒 อยู่นิ่ง (แรงดึงยังไม่ชนะ fs,max)';
+        }
+      }
+
+      // Critical angle in incline mode
+      const critDeg = (Math.atan(state.muS) * 180 / Math.PI).toFixed(1);
+      document.getElementById('disp-critical-angle').textContent = `${critDeg}°`;
+
+      updateLiveAnalysisBox();
+      updateFormulaBreakdown();
+    }
+
+    function updateLiveAnalysisBox() {
+      const box = document.getElementById('live-analysis-box');
+      const tip = document.getElementById('theory-tip-box');
+
+      if (state.mode === 'horizontal') {
+        const rad = state.fAngle * Math.PI / 180;
+        const fx = state.fApp * Math.cos(rad);
+        const fy = state.fApp * Math.sin(rad);
+        box.innerHTML = `
+          <div class="flex justify-between"><span>แรงดึงแนวระดับ F_x = F cos(${state.fAngle}°):</span><span class="text-sky-400 font-bold">${fx.toFixed(2)} N</span></div>
+          <div class="flex justify-between"><span>แรงดึงแนวดิ่ง F_y = F sin(${state.fAngle}°):</span><span class="text-sky-400 font-bold">${fy.toFixed(2)} N</span></div>
+          <div class="flex justify-between"><span>แรงแนวฉาก N = mg - F_y:</span><span class="text-emerald-400 font-bold">${state.normalF.toFixed(2)} N</span></div>
+          <div class="flex justify-between"><span>แรงเสียดทานสถิตสูงสุด f_s,max = μ_s N:</span><span class="text-rose-300 font-bold">${state.maxStaticF.toFixed(2)} N</span></div>
+          <div class="flex justify-between"><span>แรงเสียดทานจลน์ f_k = μ_k N:</span><span class="text-rose-400 font-bold">${state.kineticF.toFixed(2)} N</span></div>
+          <div class="flex justify-between border-t border-slate-800 pt-1.5"><span>ความเร่ง a = ΣF_x / m:</span><span class="text-amber-400 font-bold">${state.a.toFixed(2)} m/s²</span></div>
+        `;
+        tip.textContent = 'หลักการสำคัญ: ตราบใดที่วัตถุยังอยู่นิ่งและ |F_x| ≤ f_s,max แรงเสียดทานสถิตจะปรับค่าเท่ากับแรงดึงพอดี ทำให้แรงลัพธ์ ΣF = 0 N เมื่อ |F_x| > f_s,max วัตถุจะเริ่มเคลื่อนที่และเปลี่ยนไปใช้แรงเสียดทานจลน์ f_k';
+
+      } else if (state.mode === 'incline') {
+        const rad = state.rampAngle * Math.PI / 180;
+        const mgSin = state.m1 * state.g * Math.sin(rad);
+        const mgCos = state.m1 * state.g * Math.cos(rad);
+        box.innerHTML = `
+          <div class="flex justify-between"><span>องค์ประกอบน้ำหนักขนานพื้นเอียง mg sinθ:</span><span class="text-purple-400 font-bold">${mgSin.toFixed(2)} N</span></div>
+          <div class="flex justify-between"><span>องค์ประกอบตั้งฉากพื้นเอียง N = mg cosθ:</span><span class="text-emerald-400 font-bold">${mgCos.toFixed(2)} N</span></div>
+          <div class="flex justify-between"><span>แรงเสียดทานสถิตสูงสุด f_s,max = μ_s N:</span><span class="text-rose-300 font-bold">${state.maxStaticF.toFixed(2)} N</span></div>
+          <div class="flex justify-between"><span>แรงเสียดทานจลน์ f_k = μ_k N:</span><span class="text-rose-400 font-bold">${state.kineticF.toFixed(2)} N</span></div>
+          <div class="flex justify-between border-t border-slate-800 pt-1.5"><span>ความเร่งขนานพื้นเอียง a:</span><span class="text-amber-400 font-bold">${state.a.toFixed(2)} m/s²</span></div>
+        `;
+        tip.textContent = 'หลักการพื้นเอียง: เมื่อไม่มีแรงภายนอก (F_app = 0) วัตถุจะเริ่มไถลลงเองเมื่อ mg sinθ > μ_s mg cosθ หรือเมื่อมุมเอียง θ > arctan(μ_s) ซึ่งไม่ขึ้นกับมวลของวัตถุ';
+
+      } else if (state.mode === 'pulley') {
+        box.innerHTML = `
+          <div class="flex justify-between"><span>มวลรวมของระบบ (m₁ + m₂):</span><span class="text-white font-bold">${(state.m1 + state.m2).toFixed(2)} kg</span></div>
+          <div class="flex justify-between"><span>แรงตึงเชือกในเส้นเชือก (T):</span><span class="text-emerald-400 font-bold">${state.tensionF.toFixed(2)} N</span></div>
+          <div class="flex justify-between"><span>แรงเสียดทานที่ต้าน m₁ (f):</span><span class="text-rose-400 font-bold">${Math.abs(state.frictionF).toFixed(2)} N</span></div>
+          <div class="flex justify-between"><span>แรงลัพธ์ของระบบ (ΣF_sys):</span><span class="text-sky-400 font-bold">${state.netF.toFixed(2)} N</span></div>
+          <div class="flex justify-between border-t border-slate-800 pt-1.5"><span>ความเร่งของมวลทั้งสอง (a):</span><span class="text-amber-400 font-bold">${state.a.toFixed(2)} m/s²</span></div>
+        `;
+        tip.textContent = 'หลักการระบบมวลผูกติดกัน: เชือกเบาและไม่ยืดทำให้มวล m₁ และ m₂ มีขนาดความเร่ง a เท่ากัน โดยคิดทั้งระบบเป็น ΣF_ext = (m₁ + m₂)a';
+
+      } else if (state.mode === 'projectile') {
+        const rad = state.projAngle * Math.PI / 180;
+        const vy0 = state.v0 * Math.sin(rad);
+        const vx0 = state.v0 * Math.cos(rad);
+        const disc = vy0 * vy0 + 2 * state.g * state.h0;
+        const tIdeal = (vy0 + Math.sqrt(Math.max(0, disc))) / state.g;
+        const hMaxIdeal = state.h0 + (vy0 * vy0) / (2 * state.g);
+        const rangeIdeal = vx0 * tIdeal;
+
+        box.innerHTML = `
+          <div class="flex justify-between"><span>ความเร็วปัจจุบัน (v_x, v_y):</span><span class="text-sky-400 font-bold">(${state.vx.toFixed(1)}, ${state.vy.toFixed(1)}) m/s</span></div>
+          <div class="flex justify-between"><span>ตำแหน่งปัจจุบัน (x, y):</span><span class="text-emerald-400 font-bold">(${state.x.toFixed(1)}, ${state.y.toFixed(1)}) m</span></div>
+          <div class="flex justify-between"><span>ระยะสูงสุดไร้แรงต้าน (H_max,ideal):</span><span class="text-purple-300 font-bold">${hMaxIdeal.toFixed(2)} m</span></div>
+          <div class="flex justify-between"><span>ระยะตกไกลสุดไร้แรงต้าน (R_ideal):</span><span class="text-amber-300 font-bold">${rangeIdeal.toFixed(2)} m</span></div>
+          <div class="flex justify-between border-t border-slate-800 pt-1.5"><span>เวลาลอยตัวในสุญญากาศ (T_ideal):</span><span class="text-slate-200 font-bold">${tIdeal.toFixed(2)} s</span></div>
+        `;
+        tip.textContent = 'เปรียบเทียบเส้นประ (สุญญากาศไร้แรงต้าน) กับเส้นทึบสีฟ้า (มีแรงต้านอากาศ F_drag = -bv): แรงต้านอากาศลดทั้งระยะสูงสูงสุดและระยะตกในแนวระดับ';
+      }
+    }
+
+
+    // =========================================================================
+    // INTERACTIVE EQUATION SOLVER ENGINE (แก้สมการหาค่าตัวแปรต่างๆ)
+    // =========================================================================
+    const solverState = {
+      category: 'newton', // 'newton' | 'suvat' | 'incline_pulley' | 'projectile'
+      target: 'newton_a',
+      inputs: {
+        fApp: 25,
+        fAngle: 0,
+        m1: 5.0,
+        m2: 3.0,
+        a: 2.0,
+        mu: 0.25,
+        g: 9.8,
+        rampAngle: 25,
+        // SUVAT
+        u: 0,
+        v: 10,
+        t: 4,
+        s: 20,
+        // Projectile
+        v0: 28,
+        projAngle: 45,
+        h0: 0,
+        rangeR: 80
+      },
+      lastSolved: {}
+    };
+
+    const solverConfigs = {
+      newton: {
+        targets: [
+          { id: 'newton_a', label: 'หาความเร่ง (a) เมื่อทราบแรงดึง มวล และความเสียดทาน' },
+          { id: 'newton_f', label: 'หาแรงดึง (F_app) ที่ทำให้เกิดความเร่ง a ที่ต้องการ' },
+          { id: 'newton_f_break', label: 'หาแรงดึงต่ำสุดที่ใช้เริ่มขยับวัตถุ (ปริ่มไถล F_breakaway)' },
+          { id: 'newton_m', label: 'หามวลของวัตถุ (m) เมื่อทราบแรงดึงและความเร่ง' },
+          { id: 'newton_mu', label: 'หาสัมประสิทธิ์ความเสียดทาน (μ) จากการทดลอง' }
+        ]
+      },
+      suvat: {
+        targets: [
+          { id: 'suvat_v_from_uat', label: 'หาความเร็วปลาย (v) และระยะทาง (s) จาก u, a, t' },
+          { id: 'suvat_s_from_uav', label: 'หาการกระจัด (s) และเวลา (t) จาก u, v, a' },
+          { id: 'suvat_a_from_uvt', label: 'หาความเร่ง (a) และการกระจัด (s) จาก u, v, t' },
+          { id: 'suvat_a_from_ust', label: 'หาความเร่ง (a) และความเร็วปลาย (v) จาก u, s, t' },
+          { id: 'suvat_u_from_vat', label: 'หาความเร็วต้น (u) และการกระจัด (s) จาก v, a, t' }
+        ]
+      },
+      incline_pulley: {
+        targets: [
+          { id: 'inc_a', label: 'พื้นเอียง: หาความเร่ง (a) และแรงแนวฉาก (N)' },
+          { id: 'inc_f', label: 'พื้นเอียง: หาแรงดึงขนานพื้นเอียง (F_app) เพื่อให้ได้ความเร่ง a' },
+          { id: 'inc_crit', label: 'พื้นเอียง: หามุมวิกฤตเริ่มไถล (θ_c) จากสัมประสิทธิ์ความเสียดทานสถิต (μ_s)' },
+          { id: 'pulley_at', label: 'ระบบรอก: หาความเร่ง (a) และแรงตึงเชือก (T) จาก m₁, m₂, μ' },
+          { id: 'pulley_m2', label: 'ระบบรอก: หามวลถ่วง (m₂) ที่ทำให้เกิดความเร่ง a ที่ต้องการ' }
+        ]
+      },
+      projectile: {
+        targets: [
+          { id: 'proj_all', label: 'หาระยะตกไกลสุด (R), ความสูงสูงสุด (H_max) และเวลาลอยตัว (T)' },
+          { id: 'proj_v0', label: 'หาอัตราเร็วต้น (v₀) ที่ต้องยิงให้ตกไกล R ที่มุม θ₀' }
+        ]
+      }
+    };
+
+    const solverFieldMeta = {
+      fApp: { label: 'แรงดึง F_app (N)', step: 1, min: -200, max: 200 },
+      fAngle: { label: 'มุมแรงดึง θ (°)', step: 1, min: -45, max: 60 },
+      m1: { label: 'มวล m₁ (kg)', step: 0.5, min: 0.1, max: 100 },
+      m2: { label: 'มวลถ่วง m₂ (kg)', step: 0.5, min: 0.1, max: 100 },
+      a: { label: 'ความเร่ง a (m/s²)', step: 0.5, min: -50, max: 50 },
+      mu: { label: 'สัมประสิทธิ์ความเสียดทาน μ', step: 0.02, min: 0, max: 1.5 },
+      g: { label: 'ความเร่งโน้มถ่วง g (m/s²)', step: 0.1, min: 0.5, max: 30 },
+      rampAngle: { label: 'มุมพื้นเอียง θ_ramp (°)', step: 1, min: 0, max: 60 },
+      u: { label: 'ความเร็วต้น u (m/s)', step: 1, min: -100, max: 100 },
+      v: { label: 'ความเร็วปลาย v (m/s)', step: 1, min: -100, max: 100 },
+      t: { label: 'เวลา t (s)', step: 0.5, min: 0.1, max: 100 },
+      s: { label: 'การกระจัด s (m)', step: 1, min: -500, max: 500 },
+      v0: { label: 'อัตราเร็วต้น v₀ (m/s)', step: 1, min: 1, max: 100 },
+      projAngle: { label: 'มุมยิง θ₀ (°)', step: 1, min: 5, max: 85 },
+      h0: { label: 'ความสูงเริ่มต้น h₀ (m)', step: 1, min: 0, max: 100 },
+      rangeR: { label: 'ระยะตกแนวระดับ R (m)', step: 1, min: 1, max: 500 }
+    };
+
+    function getRequiredFieldsForTarget(targetId) {
+      const map = {
+        newton_a: ['fApp', 'fAngle', 'm1', 'mu', 'g'],
+        newton_f: ['m1', 'a', 'fAngle', 'mu', 'g'],
+        newton_f_break: ['m1', 'fAngle', 'mu', 'g'],
+        newton_m: ['fApp', 'fAngle', 'a', 'mu', 'g'],
+        newton_mu: ['fApp', 'fAngle', 'm1', 'a', 'g'],
+        suvat_v_from_uat: ['u', 'a', 't'],
+        suvat_s_from_uav: ['u', 'v', 'a'],
+        suvat_a_from_uvt: ['u', 'v', 't'],
+        suvat_a_from_ust: ['u', 's', 't'],
+        suvat_u_from_vat: ['v', 'a', 't'],
+        inc_a: ['m1', 'rampAngle', 'fApp', 'mu', 'g'],
+        inc_f: ['m1', 'rampAngle', 'a', 'mu', 'g'],
+        inc_crit: ['mu'],
+        pulley_at: ['m1', 'm2', 'mu', 'g'],
+        pulley_m2: ['m1', 'a', 'mu', 'g'],
+        proj_all: ['v0', 'projAngle', 'h0', 'g'],
+        proj_v0: ['rangeR', 'projAngle', 'g']
+      };
+      return map[targetId] || ['m1', 'g'];
+    }
+
+    function renderSolverUI() {
+      const select = document.getElementById('solver-target-select');
+      if (!select) return;
+
+      const catObj = solverConfigs[solverState.category];
+      select.innerHTML = catObj.targets.map(t =>
+        `<option value="${t.id}" ${t.id === solverState.target ? 'selected' : ''}>${t.label}</option>`
+      ).join('');
+
+      const fields = getRequiredFieldsForTarget(solverState.target);
+      const grid = document.getElementById('solver-inputs-grid');
+      grid.innerHTML = fields.map(fKey => {
+        const meta = solverFieldMeta[fKey];
+        const val = solverState.inputs[fKey];
+        return `
+          <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 space-y-1">
+            <label class="text-[11px] text-slate-400 block">${meta.label}</label>
+            <input type="number" data-solver-input="${fKey}" step="${meta.step}" min="${meta.min}" max="${meta.max}" value="${val}"
+              class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-sky-400 font-mono-num font-bold text-xs sm:text-sm focus:outline-none focus:border-sky-400">
+          </div>
+        `;
+      }).join('');
+
+      grid.querySelectorAll('[data-solver-input]').forEach(inp => {
+        inp.addEventListener('input', () => {
+          const k = inp.dataset.solverInput;
+          const v = parseFloat(inp.value);
+          if (!isNaN(v)) {
+            solverState.inputs[k] = v;
+            computeSolverResult();
+          }
+        });
+      });
+
+      computeSolverResult();
+    }
+
+    function computeSolverResult() {
+      const inp = solverState.inputs;
+      const tId = solverState.target;
+      const badge = document.getElementById('solver-formula-badge');
+      const stepsBox = document.getElementById('solver-steps-box');
+      const resMain = document.getElementById('solver-result-main');
+      const resSub = document.getElementById('solver-result-sub');
+      if (!stepsBox) return;
+
+      const rad = (deg) => deg * Math.PI / 180;
+
+      if (tId === 'newton_a') {
+        const th = rad(inp.fAngle);
+        const fx = inp.fApp * Math.cos(th);
+        const fy = inp.fApp * Math.sin(th);
+        const N = Math.max(0, inp.m1 * inp.g - fy);
+        const f = inp.mu * N;
+        const fNet = fx - Math.sign(fx || 1) * f;
+        const a = fNet / inp.m1;
+        solverState.lastSolved = { mode: 'horizontal', fApp: inp.fApp, fAngle: inp.fAngle, m1: inp.m1, muK: inp.mu, g: inp.g };
+        badge.textContent = 'a = (F cosθ - μN) / m';
+        stepsBox.innerHTML = `
+          <div>1) แรงแนวฉาก: N = mg - F sinθ = (${inp.m1})(${inp.g}) - (${inp.fApp})sin(${inp.fAngle}°) = <span class="text-emerald-400">${N.toFixed(2)} N</span></div>
+          <div>2) แรงเสียดทาน: f = μN = (${inp.mu})(${N.toFixed(2)}) = <span class="text-rose-400">${f.toFixed(2)} N</span></div>
+          <div>3) แรงลัพธ์: ΣF_x = F cosθ - f = ${fx.toFixed(2)} - ${f.toFixed(2)} = <span class="text-sky-400">${fNet.toFixed(2)} N</span></div>
+          <div>4) ความเร่ง: a = ΣF_x / m = ${fNet.toFixed(2)} / ${inp.m1} = <span class="text-amber-300 font-bold">${a.toFixed(2)} m/s²</span></div>
+        `;
+        resMain.textContent = `a = ${a.toFixed(2)} m/s²`;
+        resSub.textContent = `N = ${N.toFixed(1)} N | f = ${f.toFixed(1)} N`;
+
+      } else if (tId === 'newton_f') {
+        const th = rad(inp.fAngle);
+        const denom = Math.cos(th) + inp.mu * Math.sin(th);
+        const F = denom !== 0 ? (inp.m1 * inp.a + inp.mu * inp.m1 * inp.g) / denom : 0;
+        solverState.lastSolved = { mode: 'horizontal', fApp: F, fAngle: inp.fAngle, m1: inp.m1, muK: inp.mu, g: inp.g };
+        badge.textContent = 'F = m(a + μg) / (cosθ + μsinθ)';
+        stepsBox.innerHTML = `
+          <div>1) จากสมการ: F cosθ - μ(mg - F sinθ) = ma</div>
+          <div>2) จัดรูปหา F: F(cosθ + μ sinθ) = m(a + μg)</div>
+          <div>3) แทนค่าตัวเศษ: ${inp.m1} × (${inp.a} + ${inp.mu}×${inp.g}) = <span class="text-sky-400">${(inp.m1 * (inp.a + inp.mu * inp.g)).toFixed(2)} N</span></div>
+          <div>4) หารด้วย (cos${inp.fAngle}° + ${inp.mu}sin${inp.fAngle}° = ${denom.toFixed(3)}) ได้ <span class="text-amber-300 font-bold">F = ${F.toFixed(2)} N</span></div>
+        `;
+        resMain.textContent = `F_app = ${F.toFixed(2)} N`;
+        resSub.textContent = `เพื่อให้ได้ a = ${inp.a.toFixed(2)} m/s²`;
+
+      } else if (tId === 'newton_f_break') {
+        const th = rad(inp.fAngle);
+        const denom = Math.cos(th) + inp.mu * Math.sin(th);
+        const Fbreak = denom !== 0 ? (inp.mu * inp.m1 * inp.g) / denom : 0;
+        solverState.lastSolved = { mode: 'horizontal', fApp: Fbreak, fAngle: inp.fAngle, m1: inp.m1, muS: inp.mu, g: inp.g };
+        badge.textContent = 'F_min = μ_s mg / (cosθ + μ_s sinθ)';
+        stepsBox.innerHTML = `
+          <div>1) จุดปริ่มไถล (เริ่มขยับพอดี): F cosθ = f_s,max = μ_s(mg - F sinθ)</div>
+          <div>2) จัดรูปสมการ: F = (μ_s m g) / (cosθ + μ_s sinθ)</div>
+          <div>3) แทนค่า: (${inp.mu} × ${inp.m1} × ${inp.g}) / ${denom.toFixed(3)} = <span class="text-amber-300 font-bold">${Fbreak.toFixed(2)} N</span></div>
+        `;
+        resMain.textContent = `F_break = ${Fbreak.toFixed(2)} N`;
+        resSub.textContent = `ที่มุมดึง θ = ${inp.fAngle}°`;
+
+      } else if (tId === 'newton_m') {
+        const th = rad(inp.fAngle);
+        const num = inp.fApp * (Math.cos(th) + inp.mu * Math.sin(th));
+        const den = inp.a + inp.mu * inp.g;
+        const m = den > 0.001 ? num / den : 0.5;
+        solverState.lastSolved = { mode: 'horizontal', fApp: inp.fApp, fAngle: inp.fAngle, m1: Math.max(0.5, m), muK: inp.mu, g: inp.g };
+        badge.textContent = 'm = F(cosθ + μsinθ) / (a + μg)';
+        stepsBox.innerHTML = `
+          <div>1) จากสมการ: F cosθ - μ(mg - F sinθ) = ma</div>
+          <div>2) ย้ายข้างจัดรูปหา m: m(a + μg) = F(cosθ + μsinθ)</div>
+          <div>3) แทนค่า: ${num.toFixed(2)} / (${inp.a} + ${(inp.mu * inp.g).toFixed(2)}) = <span class="text-amber-300 font-bold">${m.toFixed(2)} kg</span></div>
+        `;
+        resMain.textContent = `m = ${m.toFixed(2)} kg`;
+        resSub.textContent = `น้ำหนัก mg = ${(m * inp.g).toFixed(1)} N`;
+
+      } else if (tId === 'newton_mu') {
+        const th = rad(inp.fAngle);
+        const fx = inp.fApp * Math.cos(th);
+        const fy = inp.fApp * Math.sin(th);
+        const N = Math.max(0.01, inp.m1 * inp.g - fy);
+        const fReq = fx - inp.m1 * inp.a;
+        const mu = Math.max(0, fReq / N);
+        solverState.lastSolved = { mode: 'horizontal', fApp: inp.fApp, fAngle: inp.fAngle, m1: inp.m1, muK: mu, muS: Math.max(mu, state.muS), g: inp.g };
+        badge.textContent = 'μ = (F cosθ - ma) / (mg - F sinθ)';
+        stepsBox.innerHTML = `
+          <div>1) หาแรงเสียดทานจากกฎนิวตัน: f = F cosθ - ma = ${fx.toFixed(2)} - (${inp.m1})(${inp.a}) = <span class="text-rose-400">${fReq.toFixed(2)} N</span></div>
+          <div>2) หาแรงแนวฉาก: N = mg - F sinθ = <span class="text-emerald-400">${N.toFixed(2)} N</span></div>
+          <div>3) สัมประสิทธิ์ความเสียดทาน: μ = f / N = ${fReq.toFixed(2)} / ${N.toFixed(2)} = <span class="text-amber-300 font-bold">${mu.toFixed(3)}</span></div>
+        `;
+        resMain.textContent = `μ = ${mu.toFixed(3)}`;
+        resSub.textContent = `f = ${fReq.toFixed(1)} N | N = ${N.toFixed(1)} N`;
+
+      } else if (tId === 'suvat_v_from_uat') {
+        const v = inp.u + inp.a * inp.t;
+        const s = inp.u * inp.t + 0.5 * inp.a * inp.t * inp.t;
+        badge.textContent = 'v = u + at , s = ut + ½at²';
+        stepsBox.innerHTML = `
+          <div>1) หาความเร็วปลาย: v = u + at = ${inp.u} + (${inp.a})(${inp.t}) = <span class="text-sky-400 font-bold">${v.toFixed(2)} m/s</span></div>
+          <div>2) หาการกระจัด: s = ut + ½at² = (${inp.u})(${inp.t}) + 0.5(${inp.a})(${inp.t})² = <span class="text-emerald-400 font-bold">${s.toFixed(2)} m</span></div>
+        `;
+        resMain.textContent = `v = ${v.toFixed(2)} m/s`;
+        resSub.textContent = `การกระจัด s = ${s.toFixed(2)} m`;
+
+      } else if (tId === 'suvat_s_from_uav') {
+        const s = Math.abs(inp.a) > 1e-5 ? (inp.v * inp.v - inp.u * inp.u) / (2 * inp.a) : 0;
+        const t = Math.abs(inp.a) > 1e-5 ? (inp.v - inp.u) / inp.a : 0;
+        badge.textContent = 's = (v² - u²) / 2a';
+        stepsBox.innerHTML = `
+          <div>1) จากสมการ: v² = u² + 2as  ⇒  s = (v² - u²) / (2a)</div>
+          <div>2) แทนค่า: (${inp.v}² - ${inp.u}²) / (2 × ${inp.a}) = <span class="text-emerald-400 font-bold">${s.toFixed(2)} m</span></div>
+          <div>3) เวลาที่ใช้: t = (v - u) / a = (${inp.v} - ${inp.u}) / ${inp.a} = <span class="text-sky-400 font-bold">${t.toFixed(2)} s</span></div>
+        `;
+        resMain.textContent = `s = ${s.toFixed(2)} m`;
+        resSub.textContent = `เวลา t = ${t.toFixed(2)} s`;
+
+      } else if (tId === 'suvat_a_from_uvt') {
+        const a = (inp.v - inp.u) / inp.t;
+        const s = 0.5 * (inp.u + inp.v) * inp.t;
+        badge.textContent = 'a = (v - u) / t';
+        stepsBox.innerHTML = `
+          <div>1) หาความเร่ง: a = (v - u) / t = (${inp.v} - ${inp.u}) / ${inp.t} = <span class="text-amber-300 font-bold">${a.toFixed(2)} m/s²</span></div>
+          <div>2) หาการกระจัด: s = ½(u + v)t = 0.5(${inp.u} + ${inp.v})(${inp.t}) = <span class="text-emerald-400 font-bold">${s.toFixed(2)} m</span></div>
+        `;
+        resMain.textContent = `a = ${a.toFixed(2)} m/s²`;
+        resSub.textContent = `การกระจัด s = ${s.toFixed(2)} m`;
+
+      } else if (tId === 'suvat_a_from_ust') {
+        const a = (2 * (inp.s - inp.u * inp.t)) / (inp.t * inp.t);
+        const v = inp.u + a * inp.t;
+        badge.textContent = 'a = 2(s - ut) / t²';
+        stepsBox.innerHTML = `
+          <div>1) จาก s = ut + ½at²  ⇒  a = 2(s - ut) / t²</div>
+          <div>2) แทนค่า: 2(${inp.s} - ${inp.u}×${inp.t}) / (${inp.t})² = <span class="text-amber-300 font-bold">${a.toFixed(2)} m/s²</span></div>
+          <div>3) ความเร็วปลาย: v = u + at = <span class="text-sky-400 font-bold">${v.toFixed(2)} m/s</span></div>
+        `;
+        resMain.textContent = `a = ${a.toFixed(2)} m/s²`;
+        resSub.textContent = `ความเร็วปลาย v = ${v.toFixed(2)} m/s`;
+
+      } else if (tId === 'suvat_u_from_vat') {
+        const u = inp.v - inp.a * inp.t;
+        const s = u * inp.t + 0.5 * inp.a * inp.t * inp.t;
+        badge.textContent = 'u = v - at';
+        stepsBox.innerHTML = `
+          <div>1) หาความเร็วต้น: u = v - at = ${inp.v} - (${inp.a})(${inp.t}) = <span class="text-sky-400 font-bold">${u.toFixed(2)} m/s</span></div>
+          <div>2) หาการกระจัด: s = ut + ½at² = <span class="text-emerald-400 font-bold">${s.toFixed(2)} m</span></div>
+        `;
+        resMain.textContent = `u = ${u.toFixed(2)} m/s`;
+        resSub.textContent = `การกระจัด s = ${s.toFixed(2)} m`;
+
+      } else if (tId === 'inc_a') {
+        const th = rad(inp.rampAngle);
+        const mgSin = inp.m1 * inp.g * Math.sin(th);
+        const N = inp.m1 * inp.g * Math.cos(th);
+        const f = inp.mu * N;
+        const fDrive = mgSin - inp.fApp;
+        const fNet = fDrive - Math.sign(fDrive || 1) * f;
+        const a = fNet / inp.m1;
+        solverState.lastSolved = { mode: 'incline', m1: inp.m1, rampAngle: inp.rampAngle, fApp: inp.fApp, muK: inp.mu, g: inp.g };
+        badge.textContent = 'a = (mg sinθ - F_app ± f) / m';
+        stepsBox.innerHTML = `
+          <div>1) แรงโน้มถ่วงขนานพื้นเอียง: mg sinθ = <span class="text-purple-400">${mgSin.toFixed(2)} N</span></div>
+          <div>2) แรงแนวฉาก: N = mg cosθ = <span class="text-emerald-400">${N.toFixed(2)} N</span>, เสียดทาน f = μN = <span class="text-rose-400">${f.toFixed(2)} N</span></div>
+          <div>3) ความเร่งขนานพื้นเอียง: a = <span class="text-amber-300 font-bold">${a.toFixed(2)} m/s²</span> (บวก = ไถลลง)</div>
+        `;
+        resMain.textContent = `a = ${a.toFixed(2)} m/s²`;
+        resSub.textContent = `N = ${N.toFixed(1)} N | mg sinθ = ${mgSin.toFixed(1)} N`;
+
+      } else if (tId === 'inc_f') {
+        const th = rad(inp.rampAngle);
+        const mgSin = inp.m1 * inp.g * Math.sin(th);
+        const N = inp.m1 * inp.g * Math.cos(th);
+        const f = inp.mu * N;
+        // To pull up the ramp with upward acceleration a: F_app = mg sin(th) + f + m a
+        const Fup = mgSin + f + inp.m1 * inp.a;
+        solverState.lastSolved = { mode: 'incline', m1: inp.m1, rampAngle: inp.rampAngle, fApp: Fup, muK: inp.mu, g: inp.g };
+        badge.textContent = 'F_app = mg sinθ + μmg cosθ + ma';
+        stepsBox.innerHTML = `
+          <div>1) น้ำหนักดึงลงพื้นเอียง: mg sinθ = <span class="text-purple-400">${mgSin.toFixed(2)} N</span></div>
+          <div>2) แรงเสียดทานต้านการดึงขึ้น: f = μ mg cosθ = <span class="text-rose-400">${f.toFixed(2)} N</span></div>
+          <div>3) แรงดึงขึ้นที่ต้องใช้: F_app = ${mgSin.toFixed(2)} + ${f.toFixed(2)} + (${inp.m1})(${inp.a}) = <span class="text-amber-300 font-bold">${Fup.toFixed(2)} N</span></div>
+        `;
+        resMain.textContent = `F_app = ${Fup.toFixed(2)} N`;
+        resSub.textContent = `ดึงขึ้นพื้นเอียง ${inp.rampAngle}°`;
+
+      } else if (tId === 'inc_crit') {
+        const critDeg = Math.atan(inp.mu) * 180 / Math.PI;
+        solverState.lastSolved = { mode: 'incline', rampAngle: Math.round(critDeg), muS: inp.mu, fApp: 0 };
+        badge.textContent = 'θ_c = arctan(μ_s)';
+        stepsBox.innerHTML = `
+          <div>1) ที่มุมวิกฤตเริ่มไถล: mg sinθ_c = μ_s mg cosθ_c</div>
+          <div>2) หาร mg cosθ_c ทั้งสองข้าง: tan(θ_c) = μ_s = ${inp.mu}</div>
+          <div>3) มุมวิกฤต: θ_c = arctan(${inp.mu}) = <span class="text-amber-300 font-bold">${critDeg.toFixed(2)}°</span></div>
+        `;
+        resMain.textContent = `θ_c = ${critDeg.toFixed(2)}°`;
+        resSub.textContent = `ไม่ขึ้นกับมวลของวัตถุ`;
+
+      } else if (tId === 'pulley_at') {
+        const f = inp.mu * inp.m1 * inp.g;
+        const fNet = inp.m2 * inp.g - f;
+        const a = Math.max(0, fNet / (inp.m1 + inp.m2));
+        const T = inp.m2 * (inp.g - a);
+        solverState.lastSolved = { mode: 'pulley', m1: inp.m1, m2: inp.m2, muK: inp.mu, g: inp.g };
+        badge.textContent = 'a = (m₂g - μm₁g) / (m₁ + m₂)';
+        stepsBox.innerHTML = `
+          <div>1) แรงฉุดจากมวลถ่วง: m₂g = (${inp.m2})(${inp.g}) = <span class="text-amber-400">${(inp.m2 * inp.g).toFixed(2)} N</span></div>
+          <div>2) แรงเสียดทานต้าน m₁ บนโต๊ะ: f = μm₁g = <span class="text-rose-400">${f.toFixed(2)} N</span></div>
+          <div>3) ความเร่งระบบ: a = (${(inp.m2 * inp.g).toFixed(2)} - ${f.toFixed(2)}) / (${inp.m1} + ${inp.m2}) = <span class="text-sky-400 font-bold">${a.toFixed(2)} m/s²</span></div>
+          <div>4) แรงตึงเชือก: T = m₂(g - a) = <span class="text-emerald-400 font-bold">${T.toFixed(2)} N</span></div>
+        `;
+        resMain.textContent = `a = ${a.toFixed(2)} m/s²`;
+        resSub.textContent = `แรงตึงเชือก T = ${T.toFixed(2)} N`;
+
+      } else if (tId === 'pulley_m2') {
+        const den = Math.max(0.1, inp.g - inp.a);
+        const m2 = (inp.m1 * (inp.a + inp.mu * inp.g)) / den;
+        solverState.lastSolved = { mode: 'pulley', m1: inp.m1, m2: Math.max(0.5, m2), muK: inp.mu, g: inp.g };
+        badge.textContent = 'm₂ = m₁(a + μg) / (g - a)';
+        stepsBox.innerHTML = `
+          <div>1) จากสมการระบบรอก: m₂g - μm₁g = (m₁ + m₂)a</div>
+          <div>2) จัดรูปหามวลถ่วง m₂: m₂(g - a) = m₁(a + μg)</div>
+          <div>3) แทนค่า: ${inp.m1}(${inp.a} + ${(inp.mu * inp.g).toFixed(2)}) / (${inp.g} - ${inp.a}) = <span class="text-amber-300 font-bold">${m2.toFixed(2)} kg</span></div>
+        `;
+        resMain.textContent = `m₂ = ${m2.toFixed(2)} kg`;
+        resSub.textContent = `เพื่อให้ได้ a = ${inp.a.toFixed(2)} m/s²`;
+
+      } else if (tId === 'proj_all') {
+        const th = rad(inp.projAngle);
+        const vx0 = inp.v0 * Math.cos(th);
+        const vy0 = inp.v0 * Math.sin(th);
+        const disc = vy0 * vy0 + 2 * inp.g * inp.h0;
+        const tFlight = (vy0 + Math.sqrt(Math.max(0, disc))) / inp.g;
+        const hMax = inp.h0 + (vy0 * vy0) / (2 * inp.g);
+        const R = vx0 * tFlight;
+        solverState.lastSolved = { mode: 'projectile', v0: inp.v0, projAngle: inp.projAngle, h0: inp.h0, g: inp.g };
+        badge.textContent = 'R = v_x T , H_max = h₀ + v_y²/2g';
+        stepsBox.innerHTML = `
+          <div>1) แตกความเร็วต้น: v_x0 = ${vx0.toFixed(2)} m/s , v_y0 = ${vy0.toFixed(2)} m/s</div>
+          <div>2) ความสูงสูงสุด: H_max = ${inp.h0} + (${vy0.toFixed(2)})² / (2×${inp.g}) = <span class="text-purple-300 font-bold">${hMax.toFixed(2)} m</span></div>
+          <div>3) เวลาลอยตัวในอากาศ: T = <span class="text-sky-400 font-bold">${tFlight.toFixed(2)} s</span></div>
+          <div>4) ระยะตกไกลสุดแนวระดับ: R = v_x0 × T = <span class="text-amber-300 font-bold">${R.toFixed(2)} m</span></div>
+        `;
+        resMain.textContent = `R = ${R.toFixed(2)} m`;
+        resSub.textContent = `H_max = ${hMax.toFixed(2)} m | T = ${tFlight.toFixed(2)} s`;
+
+      } else if (tId === 'proj_v0') {
+        const sin2th = Math.max(0.05, Math.sin(2 * rad(inp.projAngle)));
+        const v0 = Math.sqrt((inp.rangeR * inp.g) / sin2th);
+        solverState.lastSolved = { mode: 'projectile', v0: Math.min(50, Math.max(5, v0)), projAngle: inp.projAngle, h0: 0, g: inp.g };
+        badge.textContent = 'v₀ = √(R g / sin 2θ₀)';
+        stepsBox.innerHTML = `
+          <div>1) จากสูตรระยะตกไกลบนพื้นระดับ: R = (v₀² sin 2θ₀) / g</div>
+          <div>2) จัดรูปหาอัตราเร็วต้น: v₀ = √(R · g / sin 2θ₀)</div>
+          <div>3) แทนค่า: √(${inp.rangeR} × ${inp.g} / sin(${2 * inp.projAngle}°)) = <span class="text-amber-300 font-bold">${v0.toFixed(2)} m/s</span></div>
+        `;
+        resMain.textContent = `v₀ = ${v0.toFixed(2)} m/s`;
+        resSub.textContent = `เพื่อยิงไกล R = ${inp.rangeR} m ที่มุม ${inp.projAngle}°`;
+      }
+    }
+
+    function updateFormulaBreakdown() {
+      const container = document.getElementById('formula-breakdown');
+      if (!container) return;
+
+      const ke = computeEnergies().ke;
+      container.innerHTML = `
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5">
+          <div class="text-sky-400 font-semibold">1. กฎการเคลื่อนที่ข้อที่ 2 ของนิวตัน (Newton's Second Law)</div>
+          <div class="font-mono-num text-xs text-slate-300">ΣF = m · a</div>
+          <div class="font-mono-num text-xs text-amber-300">${state.netF.toFixed(2)} N = ${state.m1.toFixed(2)} kg × ${state.a.toFixed(2)} m/s²</div>
+          <div class="text-[11px] text-slate-400">สถานะปัจจุบัน: ${state.regime}</div>
+        </div>
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5">
+          <div class="text-emerald-400 font-semibold">2. สมการพลังงานจลน์และงานสูญเสีย (Work-Energy)</div>
+          <div class="font-mono-num text-xs text-slate-300">E_k = ½ m v² = ½ (${state.m1.toFixed(1)}) (${state.v.toFixed(2)})² = ${ke.toFixed(2)} J</div>
+          <div class="font-mono-num text-xs text-rose-300">E_thermal = ∫ |f| dx = ${state.thermalE.toFixed(2)} J</div>
+          <div class="text-[11px] text-slate-400">งานจากแรงเสียดทานเปลี่ยนเป็นพลังงานความร้อนสะสมในระบบ</div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // SIMULATION LOOP & CONTROLS
+    // =========================================================================
+    let lastFrameTime = null;
+
+    function updatePlayButtonUI() {
+      const btn = document.getElementById('btn-play-pause');
+      const icon = document.getElementById('play-icon');
+      const label = document.getElementById('play-label');
+      const badge = document.getElementById('status-badge');
+      const dot = document.getElementById('status-dot');
+      const text = document.getElementById('status-text');
+
+      if (state.running) {
+        icon.textContent = '⏸';
+        label.textContent = 'หยุดชั่วคราว (Pause)';
+        btn.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm bg-amber-500 hover:bg-amber-400 text-slate-950 transition shadow-lg shadow-amber-500/20';
+        badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+        text.textContent = 'กำลังจำลอง (Running)';
+      } else {
+        icon.textContent = '▶';
+        label.textContent = 'เริ่มจำลอง (Start)';
+        btn.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition shadow-lg shadow-emerald-500/20';
+        badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+        dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+        text.textContent = 'พร้อมจำลอง (หยุดชั่วคราว)';
+      }
+    }
+
+    function resetSimulation() {
+      state.running = false;
+      state.t = 0;
+      state.x = 0;
+      state.v = 0;
+      state.a = 0;
+      state.thermalE = 0;
+      state.trajActual = [];
+
+      if (state.mode === 'projectile') {
+        const rad = state.projAngle * Math.PI / 180;
+        state.x = 0;
+        state.y = state.h0;
+        state.vx = state.v0 * Math.cos(rad);
+        state.vy = state.v0 * Math.sin(rad);
+        precomputeIdealProjectile();
+      }
+
+      clearCharts();
+      computeInstantForces();
+      sampleCharts();
+      updatePlayButtonUI();
+      updateUIReadouts();
+      renderScene();
+    }
+
+    function animationLoop(timestamp) {
+      if (!lastFrameTime) lastFrameTime = timestamp;
+      const elapsed = Math.min(0.05, (timestamp - lastFrameTime) / 1000);
+      lastFrameTime = timestamp;
+
+      if (state.running) {
+        const dt = elapsed * state.timeScale;
+        // Sub-stepping for numerical accuracy
+        const subSteps = 4;
+        for (let i = 0; i < subSteps; i++) {
+          if (state.running) stepPhysics(dt / subSteps);
+        }
+        updateUIReadouts();
+      }
+      renderScene();
+      requestAnimationFrame(animationLoop);
+    }
+
+    // =========================================================================
+    // EVENT LISTENERS & MODE SWITCHING
+    // =========================================================================
+    function switchMode(newMode) {
+      state.mode = newMode;
+      const tabs = {
+        horizontal: document.getElementById('tab-horizontal'),
+        incline: document.getElementById('tab-incline'),
+        pulley: document.getElementById('tab-pulley'),
+        projectile: document.getElementById('tab-projectile')
+      };
+
+      const modeNames = {
+        horizontal: '1. พื้นราบและแรงเสียดทาน',
+        incline: '2. พื้นเอียง (Inclined Plane)',
+        pulley: '3. ระบบรอกและมวลคูควบ',
+        projectile: '4. โพรเจกไทล์และแรงต้านอากาศ'
+      };
+      const pill = document.getElementById('active-mode-pill');
+      if (pill) pill.textContent = modeNames[newMode] || '';
+      document.querySelectorAll('.mobile-mode-pill').forEach(btn => {
+        if (btn.dataset.mobileMode === newMode) {
+          btn.className = 'mobile-mode-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-500 text-slate-950 shadow';
+        } else {
+          btn.className = 'mobile-mode-pill px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700';
+        }
+      });
+
+      Object.keys(tabs).forEach(k => {
+        if (k === newMode) {
+          tabs[k].className = 'mode-tab w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-sky-500 text-slate-950 shadow';
+        } else {
+          tabs[k].className = 'mode-tab w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all text-slate-300 hover:text-white bg-slate-800/70 hover:bg-slate-700/60';
+        }
+      });
+
+      // Toggle visibility of right-hand controls
+      const show = (id, cond) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('hidden', !cond);
+      };
+
+      show('surface-preset-box', newMode !== 'projectile');
+      show('pulley-type-box', newMode === 'pulley');
+      show('ctrl-m2', newMode === 'pulley');
+      show('ctrl-fapp', newMode === 'horizontal' || newMode === 'incline');
+      show('ctrl-fangle', newMode === 'horizontal');
+      show('ctrl-ramp', newMode === 'incline');
+      show('ctrl-mus', newMode === 'horizontal' || newMode === 'incline' || (newMode === 'pulley' && state.pulleyType === 'table'));
+      show('ctrl-muk', newMode === 'horizontal' || newMode === 'incline' || (newMode === 'pulley' && state.pulleyType === 'table'));
+
+      show('ctrl-proj-v0', newMode === 'projectile');
+      show('ctrl-proj-angle', newMode === 'projectile');
+      show('ctrl-proj-h0', newMode === 'projectile');
+      show('ctrl-proj-drag', newMode === 'projectile');
+
+      const titles = {
+        horizontal: ['ตัวแปรการทดลอง: พื้นราบ', 'ปรับค่าแรงดึง มุมของแรง มวล และความเสียดทาน'],
+        incline: ['ตัวแปรการทดลอง: พื้นเอียง', 'วิเคราะห์การไถล มุมวิกฤต และการแตกแรง mg sinθ, mg cosθ'],
+        pulley: ['ตัวแปรการทดลอง: ระบบรอกและมวลคูควบ', 'วิเคราะห์แรงตึงเชือก T และความเร่งของระบบสองมวล'],
+        projectile: ['ตัวแปรการทดลอง: โพรเจกไทล์ 2 มิติ', 'เปรียบเทียบวิถีโค้งในสุญญากาศกับเมื่อมีแรงต้านอากาศ']
+      };
+      document.getElementById('control-title').textContent = titles[newMode][0];
+      document.getElementById('control-subtitle').textContent = titles[newMode][1];
+
+      resetSimulation();
+    }
+
+    function bindEvents() {
+      // 3-Line Hamburger Drawer & Page Navigation Logic
+      const drawer = document.getElementById('nav-drawer');
+      const backdrop = document.getElementById('drawer-backdrop');
+      const viewLab = document.getElementById('view-lab-main');
+      const viewSec = document.getElementById('view-secondary-pages');
+      const btnBackLab = document.getElementById('btn-back-to-lab');
+
+      const openDrawer = () => {
+        backdrop.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          backdrop.classList.remove('opacity-0');
+          drawer.classList.remove('translate-x-full');
+        });
+      };
+
+      const closeDrawer = () => {
+        backdrop.classList.add('opacity-0');
+        drawer.classList.add('translate-x-full');
+        setTimeout(() => backdrop.classList.add('hidden'), 200);
+      };
+
+      const highlightDrawerPage = (activePageId) => {
+        const activeKey = activePageId.replace('menu-page-', '');
+        document.querySelectorAll('.mob-nav-btn').forEach(btn => {
+          if (btn.dataset.mobNav === activeKey) {
+            btn.className = 'mob-nav-btn flex flex-col items-center justify-center py-1 rounded-lg text-sky-400 font-bold';
+          } else if (btn.dataset.mobNav !== 'menu') {
+            btn.className = 'mob-nav-btn flex flex-col items-center justify-center py-1 rounded-lg text-slate-400';
+          }
+        });
+        const ids = ['menu-page-lab', 'menu-page-kinematics', 'menu-page-energy', 'menu-page-formulas', 'menu-page-logger'];
+        ids.forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (id === activePageId) {
+            el.className = 'menu-page-btn w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-sky-500 text-slate-950 shadow flex items-center justify-between transition';
+          } else {
+            el.className = 'menu-page-btn w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700/70 flex items-center justify-between transition';
+          }
+        });
+      };
+
+      const navigateToPage = (pageKey) => {
+        if (pageKey === 'lab') {
+          viewSec.classList.add('hidden');
+          viewSec.classList.remove('flex');
+          viewLab.classList.remove('hidden');
+          btnBackLab.classList.add('hidden');
+          btnBackLab.classList.remove('inline-flex');
+          highlightDrawerPage('menu-page-lab');
+          setTimeout(resizeCanvas, 30);
+        } else {
+          viewLab.classList.add('hidden');
+          viewSec.classList.remove('hidden');
+          viewSec.classList.add('flex');
+          btnBackLab.classList.remove('hidden');
+          btnBackLab.classList.add('inline-flex');
+          document.getElementById(`subtab-${pageKey}`).click();
+          highlightDrawerPage(`menu-page-${pageKey}`);
+          setTimeout(() => {
+            if (kinematicsChart) kinematicsChart.resize();
+            if (energyChart) energyChart.resize();
+          }, 40);
+        }
+        closeDrawer();
+      };
+
+      document.getElementById('btn-open-drawer').addEventListener('click', openDrawer);
+      document.getElementById('btn-close-drawer').addEventListener('click', closeDrawer);
+      backdrop.addEventListener('click', closeDrawer);
+      btnBackLab.addEventListener('click', () => navigateToPage('lab'));
+
+      document.getElementById('menu-page-lab').addEventListener('click', () => navigateToPage('lab'));
+      document.getElementById('menu-page-kinematics').addEventListener('click', () => navigateToPage('kinematics'));
+      document.getElementById('menu-page-energy').addEventListener('click', () => navigateToPage('energy'));
+      document.getElementById('menu-page-formulas').addEventListener('click', () => navigateToPage('formulas'));
+      document.getElementById('menu-page-logger').addEventListener('click', () => navigateToPage('logger'));
+
+      // Mode tabs inside drawer -> switch mode & show main testing lab
+      document.getElementById('tab-horizontal').addEventListener('click', () => { switchMode('horizontal'); navigateToPage('lab'); });
+      document.getElementById('tab-incline').addEventListener('click', () => { switchMode('incline'); navigateToPage('lab'); });
+      document.getElementById('tab-pulley').addEventListener('click', () => { switchMode('pulley'); navigateToPage('lab'); });
+      document.getElementById('tab-projectile').addEventListener('click', () => { switchMode('projectile'); navigateToPage('lab'); });
+
+      // Pulley subtypes
+      document.getElementById('btn-pulley-table').addEventListener('click', () => {
+        state.pulleyType = 'table';
+        document.getElementById('btn-pulley-table').className = 'px-2.5 py-2 rounded-xl text-xs font-semibold bg-sky-500/20 border border-sky-500/40 text-sky-300';
+        document.getElementById('btn-pulley-atwood').className = 'px-2.5 py-2 rounded-xl text-xs font-medium bg-slate-800 border border-slate-700 text-slate-300 hover:text-white';
+        switchMode('pulley');
+      });
+      document.getElementById('btn-pulley-atwood').addEventListener('click', () => {
+        state.pulleyType = 'atwood';
+        document.getElementById('btn-pulley-atwood').className = 'px-2.5 py-2 rounded-xl text-xs font-semibold bg-sky-500/20 border border-sky-500/40 text-sky-300';
+        document.getElementById('btn-pulley-table').className = 'px-2.5 py-2 rounded-xl text-xs font-medium bg-slate-800 border border-slate-700 text-slate-300 hover:text-white';
+        switchMode('pulley');
+      });
+
+      // Playback buttons
+      document.getElementById('btn-play-pause').addEventListener('click', () => {
+        if (state.mode === 'projectile' && state.y <= 0 && state.t > 0.05) {
+          resetSimulation();
+        }
+        state.running = !state.running;
+        playTone(state.running ? 520 : 340, 0.05);
+        updatePlayButtonUI();
+      });
+
+      document.getElementById('btn-step').addEventListener('click', () => {
+        state.running = false;
+        stepPhysics(0.02);
+        playTone(600, 0.03);
+        updatePlayButtonUI();
+        updateUIReadouts();
+        renderScene();
+      });
+
+      document.getElementById('btn-reset').addEventListener('click', () => {
+        playTone(280, 0.06);
+        resetSimulation();
+      });
+
+      // Record snapshot to logger table
+      document.getElementById('btn-record').addEventListener('click', () => {
+        const { ke } = computeEnergies();
+        const velVal = state.mode === 'projectile' ? Math.hypot(state.vx, state.vy) : state.v;
+        const accVal = state.mode === 'projectile' ? Math.hypot(state.ax, state.ay) : state.a;
+        state.logs.push({
+          idx: state.logs.length + 1,
+          mode: state.mode,
+          t: state.t.toFixed(2),
+          x: state.x.toFixed(2),
+          v: velVal.toFixed(2),
+          a: accVal.toFixed(2),
+          fnet: state.netF.toFixed(2),
+          ffric: Math.abs(state.frictionF).toFixed(2),
+          ke: ke.toFixed(2)
+        });
+        renderLogTable();
+        playTone(720, 0.05);
+        showToast('บันทึกค่าการทดลองลงตารางแล้ว');
+      });
+
+      // Speed selector
+      document.querySelectorAll('.speed-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.timeScale = parseFloat(btn.dataset.speed);
+          document.querySelectorAll('.speed-btn').forEach(b => {
+            b.className = 'speed-btn px-2 py-1 rounded text-slate-400 hover:text-white';
+          });
+          btn.className = 'speed-btn px-2 py-1 rounded bg-sky-500 text-slate-950 font-semibold';
+        });
+      });
+
+      // Checkboxes
+      document.getElementById('chk-fbd').addEventListener('change', e => { state.showFBD = e.target.checked; renderScene(); });
+      document.getElementById('chk-components').addEventListener('change', e => { state.showComponents = e.target.checked; renderScene(); });
+      document.getElementById('chk-values').addEventListener('change', e => { state.showValues = e.target.checked; renderScene(); });
+      document.getElementById('chk-sound').addEventListener('change', e => { state.soundEnabled = e.target.checked; if (state.soundEnabled) playTone(660, 0.05); });
+
+      // Subtabs (Kinematics / Energy / Formulas / Logger)
+      const subtabs = ['kinematics', 'energy', 'formulas', 'logger'];
+      subtabs.forEach(st => {
+        document.getElementById(`subtab-${st}`).addEventListener('click', () => {
+          subtabs.forEach(other => {
+            document.getElementById(`panel-${other}`).classList.toggle('hidden', other !== st);
+            const btn = document.getElementById(`subtab-${other}`);
+            if (other === st) {
+              btn.className = 'subtab-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/30';
+            } else {
+              btn.className = 'subtab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white bg-slate-800/60';
+            }
+          });
+          highlightDrawerPage(`menu-page-${st}`);
+          setTimeout(() => {
+            if (kinematicsChart) kinematicsChart.resize();
+            if (energyChart) energyChart.resize();
+          }, 30);
+        });
+      });
+
+      // Quick button on main testing card to jump directly to the Interactive Equation Solver
+      const btnOpenSolverQuick = document.getElementById('btn-open-solver-quick');
+      if (btnOpenSolverQuick) {
+        btnOpenSolverQuick.addEventListener('click', () => {
+          navigateToPage('formulas');
+        });
+      }
+
+      // Equation Solver Category Tabs & Target Select
+      document.querySelectorAll('.solver-cat-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cat = btn.dataset.solverCat;
+          solverState.category = cat;
+          solverState.target = solverConfigs[cat].targets[0].id;
+          document.querySelectorAll('.solver-cat-btn').forEach(b => {
+            if (b.dataset.solverCat === cat) {
+              b.className = 'solver-cat-btn px-3 py-2 rounded-xl text-xs font-semibold bg-sky-500 text-slate-950 shadow text-left';
+            } else {
+              b.className = 'solver-cat-btn px-3 py-2 rounded-xl text-xs font-medium bg-slate-800/90 text-slate-300 hover:text-white border border-slate-700 text-left';
+            }
+          });
+          renderSolverUI();
+        });
+      });
+
+      const solverSelect = document.getElementById('solver-target-select');
+      if (solverSelect) {
+        solverSelect.addEventListener('change', () => {
+          solverState.target = solverSelect.value;
+          renderSolverUI();
+        });
+      }
+
+      // Pull current simulation parameters into the solver
+      const btnPullSim = document.getElementById('btn-solver-pull-sim');
+      if (btnPullSim) {
+        btnPullSim.addEventListener('click', () => {
+          solverState.inputs.fApp = state.fApp;
+          solverState.inputs.fAngle = state.fAngle;
+          solverState.inputs.m1 = state.m1;
+          solverState.inputs.m2 = state.m2;
+          solverState.inputs.mu = state.muK;
+          solverState.inputs.g = state.g;
+          solverState.inputs.rampAngle = state.rampAngle;
+          solverState.inputs.v0 = state.v0;
+          solverState.inputs.projAngle = state.projAngle;
+          solverState.inputs.h0 = state.h0;
+          renderSolverUI();
+          showToast('ดึงค่าตัวแปรจากหน้าจำลองเข้าสู่เครื่องแก้สมการแล้ว!');
+        });
+      }
+
+      // Push solved parameters directly into the live simulation lab and switch to Lab view!
+      const btnPushSim = document.getElementById('btn-solver-push-sim');
+      if (btnPushSim) {
+        btnPushSim.addEventListener('click', () => {
+          const s = solverState.lastSolved || {};
+          if (s.mode) switchMode(s.mode);
+          if (typeof s.m1 === 'number') {
+            state.m1 = Math.max(0.5, Math.min(25, Number(s.m1.toFixed(1))));
+            document.getElementById('slider-m1').value = state.m1;
+            document.getElementById('disp-m1').textContent = state.m1.toFixed(1);
+          }
+          if (typeof s.m2 === 'number') {
+            state.m2 = Math.max(0.5, Math.min(25, Number(s.m2.toFixed(1))));
+            document.getElementById('slider-m2').value = state.m2;
+            document.getElementById('disp-m2').textContent = state.m2.toFixed(1);
+          }
+          if (typeof s.fApp === 'number') {
+            setForceValue(s.fApp);
+          }
+          if (typeof s.fAngle === 'number') {
+            state.fAngle = Math.max(-45, Math.min(60, Math.round(s.fAngle)));
+            document.getElementById('slider-fangle').value = state.fAngle;
+            document.getElementById('disp-fangle').textContent = state.fAngle;
+          }
+          if (typeof s.rampAngle === 'number') {
+            state.rampAngle = Math.max(0, Math.min(60, Math.round(s.rampAngle)));
+            document.getElementById('slider-ramp').value = state.rampAngle;
+            document.getElementById('disp-ramp').textContent = state.rampAngle;
+          }
+          if (typeof s.muK === 'number') {
+            state.muK = Math.max(0, Math.min(1.0, Number(s.muK.toFixed(2))));
+            state.muS = Math.max(state.muK, state.muS);
+            document.getElementById('slider-muk').value = state.muK;
+            document.getElementById('disp-muk').textContent = state.muK.toFixed(2);
+            document.getElementById('slider-mus').value = state.muS;
+            document.getElementById('disp-mus').textContent = state.muS.toFixed(2);
+          }
+          if (typeof s.v0 === 'number') {
+            state.v0 = Math.max(5, Math.min(50, Number(s.v0.toFixed(1))));
+            document.getElementById('slider-v0').value = state.v0;
+            document.getElementById('disp-v0').textContent = state.v0.toFixed(1);
+          }
+          if (typeof s.projAngle === 'number') {
+            state.projAngle = Math.max(5, Math.min(85, Math.round(s.projAngle)));
+            document.getElementById('slider-proj-angle').value = state.projAngle;
+            document.getElementById('disp-proj-angle').textContent = state.projAngle;
+          }
+          resetSimulation();
+          navigateToPage('lab');
+          showToast('ส่งค่าที่คำนวณได้ไปตั้งค่าในหน้าจำลองเรียบร้อยแล้ว!');
+        });
+      }
+
+      renderSolverUI();
+
+      document.getElementById('btn-clear-chart').addEventListener('click', clearCharts);
+
+      // Sliders binding helper
+      const bindSlider = (sliderId, dispId, propName, onUpdate) => {
+        const slider = document.getElementById(sliderId);
+        const disp = document.getElementById(dispId);
+        slider.addEventListener('input', () => {
+          const val = parseFloat(slider.value);
+          state[propName] = val;
+          disp.textContent = Number.isInteger(val) && slider.step === '1' ? val : val.toFixed(slider.step.includes('.02') ? 2 : 1);
+          if (onUpdate) onUpdate(val);
+          updateUIReadouts();
+          renderScene();
+        });
+      };
+
+      bindSlider('slider-m1', 'disp-m1', 'm1');
+      bindSlider('slider-m2', 'disp-m2', 'm2');
+      bindSlider('slider-fapp', 'disp-fapp', 'fApp');
+      bindSlider('slider-fangle', 'disp-fangle', 'fAngle');
+      bindSlider('slider-ramp', 'disp-ramp', 'rampAngle');
+      bindSlider('slider-mus', 'disp-mus', 'muS', (val) => {
+        if (state.muK > val) {
+          state.muK = val;
+          document.getElementById('slider-muk').value = val;
+          document.getElementById('disp-muk').textContent = val.toFixed(2);
+        }
+      });
+      bindSlider('slider-muk', 'disp-muk', 'muK', (val) => {
+        if (val > state.muS) {
+          state.muS = val;
+          document.getElementById('slider-mus').value = val;
+          document.getElementById('disp-mus').textContent = val.toFixed(2);
+        }
+      });
+      bindSlider('slider-v0', 'disp-v0', 'v0', () => { if (state.t === 0) resetSimulation(); else precomputeIdealProjectile(); });
+      bindSlider('slider-proj-angle', 'disp-proj-angle', 'projAngle', () => { if (state.t === 0) resetSimulation(); else precomputeIdealProjectile(); });
+      bindSlider('slider-h0', 'disp-h0', 'h0', () => { if (state.t === 0) resetSimulation(); else precomputeIdealProjectile(); });
+      bindSlider('slider-drag', 'disp-drag', 'dragB');
+      bindSlider('slider-g', 'disp-g', 'g', () => { if (state.mode === 'projectile') precomputeIdealProjectile(); });
+
+      document.getElementById('btn-zero-force').addEventListener('click', () => {
+        state.fApp = 0;
+        document.getElementById('slider-fapp').value = 0;
+        document.getElementById('disp-fapp').textContent = '0.0';
+        updateUIReadouts();
+        renderScene();
+      });
+
+      // Surface Presets
+      const surfaces = {
+        ice: { muS: 0.10, muK: 0.03 },
+        wood: { muS: 0.40, muK: 0.25 },
+        rubber: { muS: 0.90, muK: 0.70 },
+        frictionless: { muS: 0.00, muK: 0.00 }
+      };
+      document.querySelectorAll('.surface-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = surfaces[btn.dataset.surface];
+          state.muS = s.muS;
+          state.muK = s.muK;
+          document.getElementById('slider-mus').value = s.muS;
+          document.getElementById('disp-mus').textContent = s.muS.toFixed(2);
+          document.getElementById('slider-muk').value = s.muK;
+          document.getElementById('disp-muk').textContent = s.muK.toFixed(2);
+
+          document.querySelectorAll('.surface-btn').forEach(b => {
+            b.className = 'surface-btn px-2 py-1.5 rounded-lg text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200';
+          });
+          btn.className = 'surface-btn px-2 py-1.5 rounded-lg text-xs bg-sky-500/20 border border-sky-500/40 text-sky-300 font-semibold';
+          updateUIReadouts();
+          renderScene();
+        });
+      });
+
+      // Planet Gravity Presets
+      document.querySelectorAll('.planet-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const gVal = parseFloat(btn.dataset.g);
+          state.g = gVal;
+          document.getElementById('slider-g').value = gVal;
+          document.getElementById('disp-g').textContent = gVal.toFixed(2);
+          document.querySelectorAll('.planet-btn').forEach(b => {
+            b.className = 'planet-btn flex-1 py-1 rounded bg-slate-800 border border-slate-700 text-slate-300 text-[11px]';
+          });
+          btn.className = 'planet-btn flex-1 py-1 rounded bg-purple-500/20 border border-purple-500/40 text-purple-300 text-[11px] font-medium';
+          if (state.mode === 'projectile') precomputeIdealProjectile();
+          updateUIReadouts();
+          renderScene();
+        });
+      });
+
+      // Reset default parameters button
+      document.getElementById('btn-default-params').addEventListener('click', () => {
+        state.m1 = 5.0;
+        state.m2 = 3.0;
+        state.fApp = 25.0;
+        state.fAngle = 0;
+        state.rampAngle = 25;
+        state.muS = 0.40;
+        state.muK = 0.25;
+        state.v0 = 28.0;
+        state.projAngle = 45;
+        state.h0 = 0;
+        state.dragB = 0.15;
+        state.g = 9.8;
+
+        document.getElementById('slider-m1').value = 5.0; document.getElementById('disp-m1').textContent = '5.0';
+        document.getElementById('slider-m2').value = 3.0; document.getElementById('disp-m2').textContent = '3.0';
+        document.getElementById('slider-fapp').value = 25; document.getElementById('disp-fapp').textContent = '25.0';
+        document.getElementById('slider-fangle').value = 0; document.getElementById('disp-fangle').textContent = '0';
+        document.getElementById('slider-ramp').value = 25; document.getElementById('disp-ramp').textContent = '25';
+        document.getElementById('slider-mus').value = 0.40; document.getElementById('disp-mus').textContent = '0.40';
+        document.getElementById('slider-muk').value = 0.25; document.getElementById('disp-muk').textContent = '0.25';
+        document.getElementById('slider-v0').value = 28; document.getElementById('disp-v0').textContent = '28.0';
+        document.getElementById('slider-proj-angle').value = 45; document.getElementById('disp-proj-angle').textContent = '45';
+        document.getElementById('slider-h0').value = 0; document.getElementById('disp-h0').textContent = '0.0';
+        document.getElementById('slider-drag').value = 0.15; document.getElementById('disp-drag').textContent = '0.15';
+        document.getElementById('slider-g').value = 9.8; document.getElementById('disp-g').textContent = '9.80';
+
+        resetSimulation();
+      });
+
+      // Vector Scale Slider
+      const vecScaleSlider = document.getElementById('slider-vec-scale');
+      const vecScaleDisp = document.getElementById('disp-vec-scale');
+      vecScaleSlider.addEventListener('input', () => {
+        state.vectorScale = parseFloat(vecScaleSlider.value);
+        vecScaleDisp.textContent = `${state.vectorScale.toFixed(1)}x`;
+        renderScene();
+      });
+
+      // Zoom & View Controls
+      document.getElementById('btn-zoom-in').addEventListener('click', () => setZoom(state.zoom + 0.2));
+      document.getElementById('btn-zoom-out').addEventListener('click', () => setZoom(state.zoom - 0.2));
+      document.getElementById('btn-zoom-reset').addEventListener('click', () => resetView());
+      document.getElementById('btn-recenter').addEventListener('click', () => {
+        state.panX = 0;
+        state.panY = 0;
+        renderScene();
+        showToast('จัดกึ่งกลางมุมมองแล้ว');
+      });
+      document.getElementById('slider-zoom').addEventListener('input', (e) => {
+        setZoom(parseFloat(e.target.value));
+      });
+
+      const btnCamFollow = document.getElementById('btn-cam-follow');
+      btnCamFollow.addEventListener('click', () => {
+        state.camFollow = !state.camFollow;
+        btnCamFollow.className = state.camFollow
+          ? 'px-2 h-7 rounded-lg bg-sky-500/20 border border-sky-500/40 text-sky-300 text-xs font-semibold flex items-center gap-1 transition'
+          : 'px-2 h-7 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 text-xs flex items-center gap-1 transition';
+        renderScene();
+      });
+
+      const btnExpand = document.getElementById('btn-expand-canvas');
+      btnExpand.addEventListener('click', () => {
+        state.expandedCanvas = !state.expandedCanvas;
+        const container = document.getElementById('canvas-container');
+        if (state.expandedCanvas) {
+          container.className = 'relative w-full h-[400px] sm:h-[520px] lg:h-[600px] bg-slate-950 select-none overflow-hidden transition-all duration-300';
+          document.getElementById('expand-label').textContent = 'ย่อจอ';
+          btnExpand.className = 'w-8 sm:w-auto sm:px-2 h-8 sm:h-7 rounded-lg bg-sky-500/20 border border-sky-500/40 text-sky-300 text-xs font-semibold flex items-center justify-center gap-1 transition';
+        } else {
+          container.className = 'relative w-full h-[260px] sm:h-[380px] lg:h-[450px] bg-slate-950 select-none overflow-hidden transition-all duration-300';
+          document.getElementById('expand-label').textContent = 'ขยายจอ';
+          btnExpand.className = 'w-8 sm:w-auto sm:px-2 h-8 sm:h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs flex items-center justify-center gap-1 transition';
+        }
+        setTimeout(resizeCanvas, 50);
+        setTimeout(resizeCanvas, 310);
+      });
+
+      // Tool Mode Switcher (Force Pull vs Pan View)
+      const btnToolForce = document.getElementById('btn-tool-force');
+      const btnToolPan = document.getElementById('btn-tool-pan');
+      const setCanvasTool = (tool) => {
+        state.canvasTool = tool;
+        if (tool === 'force') {
+          btnToolForce.className = 'px-2.5 py-1 rounded-lg font-semibold bg-sky-500 text-slate-950 transition flex items-center gap-1';
+          btnToolPan.className = 'px-2.5 py-1 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1';
+        } else {
+          btnToolPan.className = 'px-2.5 py-1 rounded-lg font-semibold bg-sky-500 text-slate-950 transition flex items-center gap-1';
+          btnToolForce.className = 'px-2.5 py-1 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1';
+        }
+      };
+      btnToolForce.addEventListener('click', () => setCanvasTool('force'));
+      btnToolPan.addEventListener('click', () => setCanvasTool('pan'));
+
+      // Direct Numeric Force Input & Quick Force Helpers
+      const setForceValue = (val) => {
+        const clamped = Math.max(-100, Math.min(100, Number(val.toFixed(1))));
+        state.fApp = clamped;
+        document.getElementById('slider-fapp').value = clamped;
+        document.getElementById('disp-fapp').textContent = clamped.toFixed(1);
+        document.getElementById('input-fapp').value = clamped;
+        updateUIReadouts();
+        renderScene();
+      };
+
+      document.getElementById('input-fapp').addEventListener('input', (e) => {
+        const v = parseFloat(e.target.value);
+        if (!isNaN(v)) setForceValue(v);
+      });
+
+      document.getElementById('btn-match-fsmax').addEventListener('click', () => {
+        computeInstantForces();
+        if (state.mode === 'horizontal') {
+          const rad = state.fAngle * Math.PI / 180;
+          const denom = Math.cos(rad) + state.muS * Math.sin(rad);
+          const targetF = denom > 0.05 ? (state.muS * state.m1 * state.g) / denom : state.maxStaticF;
+          setForceValue(targetF);
+          showToast(`ตั้งแรง F_app = ${targetF.toFixed(1)} N (ปริ่มไถลพอดี)`);
+        } else if (state.mode === 'incline') {
+          const rad = state.rampAngle * Math.PI / 180;
+          const mgSin = state.m1 * state.g * Math.sin(rad);
+          setForceValue(mgSin);
+          showToast(`ตั้งแรงประคอง F_app = mg sinθ (${mgSin.toFixed(1)} N)`);
+        }
+      });
+
+      document.getElementById('btn-exceed-fsmax').addEventListener('click', () => {
+        computeInstantForces();
+        const targetF = Math.min(100, Math.ceil(state.maxStaticF + 5));
+        setForceValue(targetF);
+        showToast(`ตั้งแรง F_app = ${targetF.toFixed(1)} N (ชนะแรงเสียดทานสถิต)`);
+      });
+
+      document.getElementById('btn-zero-angle').addEventListener('click', () => {
+        state.fAngle = 0;
+        document.getElementById('slider-fangle').value = 0;
+        document.getElementById('disp-fangle').textContent = '0';
+        updateUIReadouts();
+        renderScene();
+      });
+
+      document.getElementById('btn-set-crit-angle').addEventListener('click', () => {
+        const crit = Math.round(Math.atan(state.muS) * 180 / Math.PI);
+        state.rampAngle = crit;
+        document.getElementById('slider-ramp').value = crit;
+        document.getElementById('disp-ramp').textContent = crit;
+        updateUIReadouts();
+        renderScene();
+        showToast(`ตั้งมุมพื้นเอียงใกล้เคียงมุมวิกฤต (${crit}°)`);
+      });
+
+      // Universal Stepper Buttons (- / +) for all sliders
+      document.querySelectorAll('[data-step-slider]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const slider = document.getElementById(btn.dataset.stepSlider);
+          if (!slider) return;
+          const delta = parseFloat(btn.dataset.stepDelta);
+          const min = parseFloat(slider.min);
+          const max = parseFloat(slider.max);
+          const next = Math.max(min, Math.min(max, parseFloat(slider.value) + delta));
+          slider.value = Number(next.toFixed(2));
+          slider.dispatchEvent(new Event('input'));
+        });
+      });
+
+      // 1-Click Quick Scenarios
+      document.getElementById('btn-scen-threshold').addEventListener('click', () => {
+        switchMode('horizontal');
+        state.m1 = 5.0; state.muS = 0.40; state.muK = 0.25; state.fAngle = 0;
+        document.getElementById('slider-m1').value = 5.0; document.getElementById('disp-m1').textContent = '5.0';
+        document.getElementById('slider-mus').value = 0.40; document.getElementById('disp-mus').textContent = '0.40';
+        document.getElementById('slider-muk').value = 0.25; document.getElementById('disp-muk').textContent = '0.25';
+        document.getElementById('slider-fangle').value = 0; document.getElementById('disp-fangle').textContent = '0';
+        setForceValue(state.muS * state.m1 * state.g);
+        resetSimulation();
+        navigateToPage('lab'); showToast('การทดลอง: ปริ่มไถล (F_app = f_s,max = 19.6 N) ลองกด +1N เพื่อดูการขยับ!');
+      });
+
+      document.getElementById('btn-scen-accelerate').addEventListener('click', () => {
+        switchMode('horizontal');
+        setForceValue(40);
+        resetSimulation();
+        state.running = true;
+        updatePlayButtonUI();
+        navigateToPage('lab'); showToast('การทดลอง: ออกแรง 40 N ชนะแรงเสียดทานสถิต!');
+      });
+
+      document.getElementById('btn-scen-critical').addEventListener('click', () => {
+        switchMode('incline');
+        state.fApp = 0;
+        document.getElementById('slider-fapp').value = 0;
+        document.getElementById('disp-fapp').textContent = '0.0';
+        const crit = Math.ceil(Math.atan(state.muS) * 180 / Math.PI) + 1;
+        state.rampAngle = crit;
+        document.getElementById('slider-ramp').value = crit;
+        document.getElementById('disp-ramp').textContent = crit;
+        resetSimulation();
+        state.running = true;
+        updatePlayButtonUI();
+        navigateToPage('lab'); showToast(`การทดลอง: พื้นเอียงชันกว่ามุมวิกฤต (${crit}°) วัตถุไถลลงเอง!`);
+      });
+
+      document.getElementById('btn-scen-pulley').addEventListener('click', () => {
+        state.pulleyType = 'table';
+        switchMode('pulley');
+        state.m1 = 4.0; state.m2 = 4.0;
+        document.getElementById('slider-m1').value = 4.0; document.getElementById('disp-m1').textContent = '4.0';
+        document.getElementById('slider-m2').value = 4.0; document.getElementById('disp-m2').textContent = '4.0';
+        resetSimulation();
+        state.running = true;
+        updatePlayButtonUI();
+        navigateToPage('lab'); showToast('การทดลอง: ระบบรอกมวลคูควบเคลื่อนที่ด้วยความเร่งคงตัว');
+      });
+
+      document.getElementById('btn-scen-proj45').addEventListener('click', () => {
+        switchMode('projectile');
+        state.projAngle = 45; state.v0 = 30; state.h0 = 0; state.dragB = 0.15;
+        document.getElementById('slider-proj-angle').value = 45; document.getElementById('disp-proj-angle').textContent = '45';
+        document.getElementById('slider-v0').value = 30; document.getElementById('disp-v0').textContent = '30.0';
+        resetSimulation();
+        state.running = true;
+        updatePlayButtonUI();
+        navigateToPage('lab'); showToast('การทดลอง: ยิงโพรเจกไทล์มุม 45° เปรียบเทียบสุญญากาศกับแรงต้านอากาศ');
+      });
+
+      // Mouse Wheel Zoom on Canvas
+      canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const px = e.clientX - rect.left;
+        const py = e.clientY - rect.top;
+        const delta = e.deltaY < 0 ? 0.12 : -0.12;
+        setZoom(state.zoom + delta, px, py);
+      }, { passive: false });
+
+      // Double-click on Canvas to Reset Zoom & Pan
+      canvas.addEventListener('dblclick', () => {
+        resetView();
+        showToast('รีเซ็ตมุมมอง 100% แล้ว');
+      });
+
+      // Direct Canvas Dragging (Force Pull vs Pan View)
+      const startDrag = (clientX, clientY, forcePan = false) => {
+        state.dragging = true;
+        state.dragStartX = clientX;
+        state.dragStartY = clientY;
+        const shouldPan = forcePan || state.canvasTool === 'pan' || (state.mode !== 'horizontal' && state.mode !== 'incline');
+        state.dragType = shouldPan ? 'pan' : 'force';
+        state.panStartX = state.panX;
+        state.panStartY = state.panY;
+      };
+
+      const moveDrag = (clientX, clientY) => {
+        if (!state.dragging) return;
+        const dx = clientX - state.dragStartX;
+        const dy = clientY - state.dragStartY;
+        if (state.dragType === 'pan') {
+          state.panX = state.panStartX + dx;
+          state.panY = state.panStartY + dy;
+          renderScene();
+        } else {
+          const newForce = Math.max(-100, Math.min(100, Math.round(dx * 0.6)));
+          setForceValue(newForce);
+        }
+      };
+
+      const endDrag = () => { state.dragging = false; };
+
+      canvas.addEventListener('mousedown', e => {
+        const isRightOrMiddle = e.button === 1 || e.button === 2 || e.shiftKey;
+        startDrag(e.clientX, e.clientY, isRightOrMiddle);
+      });
+      canvas.addEventListener('contextmenu', e => e.preventDefault());
+      window.addEventListener('mousemove', e => moveDrag(e.clientX, e.clientY));
+      window.addEventListener('mouseup', endDrag);
+
+      // Mobile legend toggle button
+      const btnLegendMob = document.getElementById('btn-toggle-legend-mobile');
+      const mobLegendBar = document.getElementById('mobile-legend-bar');
+      if (btnLegendMob && mobLegendBar) {
+        btnLegendMob.addEventListener('click', () => {
+          const isHidden = mobLegendBar.classList.contains('hidden');
+          mobLegendBar.classList.toggle('hidden', !isHidden);
+          mobLegendBar.classList.toggle('flex', isHidden);
+        });
+      }
+
+      // Mobile Quick Mode Pills & Bottom Nav Bindings
+      document.querySelectorAll('.mobile-mode-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          switchMode(btn.dataset.mobileMode);
+          navigateToPage('lab');
+        });
+      });
+
+      document.querySelectorAll('.mob-nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.mobNav;
+          if (target === 'menu') {
+            openDrawer();
+          } else {
+            navigateToPage(target);
+          }
+        });
+      });
+
+      // Touch support on Canvas: 1-finger drag/pan + 2-finger pinch-to-zoom & pan (with preventDefault so page doesn't scroll)
+      let pinchMidX = 0;
+      let pinchMidY = 0;
+
+      canvas.addEventListener('touchstart', e => {
+        if (e.cancelable) e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        if (e.touches.length === 2) {
+          state.dragging = false;
+          const d = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          pinchMidX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
+          pinchMidY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
+          state.pinchStartDist = Math.max(10, d);
+          state.pinchStartZoom = state.zoom;
+        } else if (e.touches.length === 1) {
+          startDrag(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: false });
+
+      canvas.addEventListener('touchmove', e => {
+        if (e.cancelable) e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        if (e.touches.length === 2 && state.pinchStartDist > 0) {
+          const d = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          const midX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
+          const midY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
+          // Pan along with two-finger movement
+          state.panX += (midX - pinchMidX);
+          state.panY += (midY - pinchMidY);
+          pinchMidX = midX;
+          pinchMidY = midY;
+          const scaleRatio = d / state.pinchStartDist;
+          setZoom(state.pinchStartZoom * scaleRatio, midX, midY);
+        } else if (e.touches.length === 1 && state.dragging) {
+          moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: false });
+
+      window.addEventListener('touchend', () => {
+        state.dragging = false;
+        state.pinchStartDist = 0;
+      });
+
+      // Keyboard Shortcuts for rapid testing
+      window.addEventListener('keydown', (e) => {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+        if (e.code === 'Space') {
+          e.preventDefault();
+          document.getElementById('btn-play-pause').click();
+        } else if (e.key === 'r' || e.key === 'R') {
+          resetSimulation();
+        } else if (e.key === '+' || e.key === '=') {
+          setZoom(state.zoom + 0.15);
+        } else if (e.key === '-' || e.key === '_') {
+          setZoom(state.zoom - 0.15);
+        } else if (e.key === '0') {
+          resetView();
+        } else if (e.key === 'ArrowRight' && (state.mode === 'horizontal' || state.mode === 'incline')) {
+          setForceValue(state.fApp + 5);
+        } else if (e.key === 'ArrowLeft' && (state.mode === 'horizontal' || state.mode === 'incline')) {
+          setForceValue(state.fApp - 5);
+        }
+      });
+
+      // Data logger actions
+      document.getElementById('btn-clear-log').addEventListener('click', () => {
+        state.logs = [];
+        renderLogTable();
+      });
+
+      document.getElementById('btn-copy-csv').addEventListener('click', () => {
+        if (state.logs.length === 0) {
+          showToast('ยังไม่มีข้อมูลให้คัดลอก');
+          return;
+        }
+        const headers = ['Index,Mode,Time_s,Position_m,Velocity_ms,Acceleration_ms2,NetForce_N,Friction_N,KineticEnergy_J'];
+        const rows = state.logs.map(r => `${r.idx},${r.mode},${r.t},${r.x},${r.v},${r.a},${r.fnet},${r.ffric},${r.ke}`);
+        const csv = headers.concat(rows).join('\n');
+
+        const ta = document.createElement('textarea');
+        ta.value = csv;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('คัดลอกตาราง CSV ลงคลิปบอร์ดแล้ว!');
+      });
+
+      window.addEventListener('resize', resizeCanvas);
+    }
+
+    function renderLogTable() {
+      const tbody = document.getElementById('logger-tbody');
+      document.getElementById('log-count').textContent = state.logs.length;
+      const drawerBadge = document.getElementById('drawer-log-badge');
+      if (drawerBadge) drawerBadge.textContent = `${state.logs.length} จุด`;
+      if (state.logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="py-6 text-center text-slate-500 font-sans">ยังไม่มีข้อมูลที่บันทึก กด "📌 บันทึกจุดข้อมูล" เพื่อเพิ่มแถว</td></tr>';
+        return;
+      }
+      tbody.innerHTML = state.logs.map(r => `
+        <tr class="hover:bg-slate-800/50">
+          <td class="py-1.5 px-3 text-slate-400">${r.idx}</td>
+          <td class="py-1.5 px-3 text-slate-300">${r.mode}</td>
+          <td class="py-1.5 px-3 text-sky-400">${r.t}</td>
+          <td class="py-1.5 px-3">${r.x}</td>
+          <td class="py-1.5 px-3 text-sky-300">${r.v}</td>
+          <td class="py-1.5 px-3 text-amber-300">${r.a}</td>
+          <td class="py-1.5 px-3 text-emerald-300">${r.fnet}</td>
+          <td class="py-1.5 px-3 text-rose-300">${r.ffric}</td>
+          <td class="py-1.5 px-3 text-purple-300">${r.ke}</td>
+        </tr>
+      `).join('');
+    }
+
+    window.onload = () => {
+      initCharts();
+      bindEvents();
+      resizeCanvas();
+      resetSimulation();
+      requestAnimationFrame(animationLoop);
+    };
+  </script>
+</body>
+</html>
